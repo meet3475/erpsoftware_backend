@@ -23,6 +23,7 @@ const WebPurchase = {
         let total_amount_dollar = body.total_amount_dollar ?? 0;
         let remark = body.remark ?? 0;
         let items = body.items ?? [];
+        console.log("items", items);
         let created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
         let updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
 

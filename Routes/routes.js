@@ -387,10 +387,16 @@ const { getsaleslistingdata } = WebSale;
 
 //--------------------------------------------------------------
 // WEB PURCHASE FUNCTIONS CALL //
+import Expeness from '../Expeness/Expeness.js';
+const { getexpeneslist } = Expeness;
+//--------------------------------------------------------------
+
+
+//--------------------------------------------------------------
+// WEB PURCHASE FUNCTIONS CALL //
 import Items from '../Items/Items.js';
 const { getitemslist } = Items;
 //--------------------------------------------------------------
-
 
 // /**
 // * @swagger
@@ -912,7 +918,7 @@ router.post("/deletepurchasedata", deletepurchasedata);
 router.post("/getsinglewebpurchase", getsinglewebpurchase);
 //--------------------------------------------------------------
 
-// WEB PURCHASE MODULES RELATED ROUTS //
+// WEB SALE MODULES RELATED ROUTS //
 router.post("/getsaleslistingdata", getsaleslistingdata);
 //--------------------------------------------------------------
 
@@ -921,5 +927,8 @@ router.post("/getsaleslistingdata", getsaleslistingdata);
 router.post("/getitemslist", getitemslist);
 //--------------------------------------------------------------
 
-
+//--------------------------------------------------------------
+// EXPENESS MODULES RELATED ROUTS //
+router.post("/getexpeneslist", getexpeneslist);
+//--------------------------------------------------------------
 export default router;
