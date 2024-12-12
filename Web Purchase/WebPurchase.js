@@ -238,6 +238,8 @@ const WebPurchase = {
 
         let body = req?.body;
         let id = body.id ?? 0;
+        console.log("id::", id);
+        
 
         let getuserlistingdata = `SELECT 
         id,
@@ -258,7 +260,11 @@ const WebPurchase = {
         remark FROM purchase_invoice_report WHERE id=${id};
         `;
 
+        console.log("getuserlistingdata::", getuserlistingdata);
+
         conn.query(getuserlistingdata, (error, data) => {
+
+            console.log("data::", data);
 
             if (error || data?.length == 0) {
                 return res?.send({ Status: 400, Message: 'Data Not Found!!!!', Data: "Invalid Data!!!!" });

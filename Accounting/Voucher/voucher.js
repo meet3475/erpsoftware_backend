@@ -952,6 +952,8 @@ const AllVoucherApis = {
         console.log("voucher_id::", voucher_id);   
         const voucher_child_id = body?.voucher_child_id ? body?.voucher_child_id : 0;
         console.log("voucher_child_id::", voucher_child_id);
+        console.log("party_id::", party_id);
+
         
 
         if (user_id.length == 0 || user_id == 0) {
@@ -1023,6 +1025,7 @@ const AllVoucherApis = {
 
                 SELECT 
                     'sale' AS invoice_type,
+                    'webportal' AS releted_name,
                     tax_par.id AS purchase_tax_id,
                     tax_par.id AS ref_id,
                     tax_par.id AS invoice_no,
@@ -1149,15 +1152,25 @@ const AllVoucherApis = {
                     AND 
                 child.is_delete_status = '0'
                 GROUP BY  
-                    blrcl.sales_order_id;`
-
-
+                    blrcl.sales_order_id;
+                `;
             console.log("getsalesinvoicedata::", getsalesinvoicedata);
-
+            
             conn.query(getsalesinvoicedata, (error, data) => {
-
-                console.log("data::", data);
                 
+            // console.log("data getsalesinvoicedata ::", data);
+
+            // if (error || !data[0] || data[0].length === 0) {
+            //     res?.send({ Status: 400, Count: 0, Message: 'Data Not Found!!!!', Data: error });
+            //     next();
+            //     return;
+            // }
+
+            // // // Flatten the nested data if necessary
+            // // const flattenedData = data[0];
+            // const flattenedData = [...data[0], ...data[1]]; // The result from the stored procedure is usually in the first index
+            // console.log("data results ::", data[0],data[1]);
+        
                 if (error || data?.length == 0) {
                     res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
                     next();

@@ -382,7 +382,7 @@ const { createwebpurchase, getpurchaselistingdata, deletepurchasedata, getsingle
 //--------------------------------------------------------------
 // WEB SALE FUNCTIONS CALL //
 import WebSale from '../Web Sale/WebSale.js';
-const {createwebsale, getsaleslistingdata , getsinglewebsale} = WebSale;
+const {createwebsale, getsaleslistingdata, deletesaledata, getsinglewebsale} = WebSale;
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
@@ -921,6 +921,7 @@ router.post("/getsinglewebpurchase", getsinglewebpurchase);
 // WEB SALE MODULES RELATED ROUTS //
 router.post("/createwebsale", createwebsale);
 router.post("/getsaleslistingdata", getsaleslistingdata);
+router.post("/deletesaledata", deletesaledata);
 router.post("/getsinglewebsale", getsinglewebsale);
 //--------------------------------------------------------------
 
