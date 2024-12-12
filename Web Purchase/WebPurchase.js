@@ -180,7 +180,7 @@ const WebPurchase = {
         remark="${remark}",
         created_at='${created_at}',
         updated_at='${updated_at}',
-        is_delete_status='0' ;
+        is_delete_status='0';
         SELECT * FROM purchase_invoice_report WHERE id=LAST_INSERT_ID();
         `;
 

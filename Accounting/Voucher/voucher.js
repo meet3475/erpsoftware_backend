@@ -29,6 +29,7 @@ const AllVoucherApis = {
         const voucher_date = body?.voucher_date ? body?.voucher_date : constant.moment().format('YYYY-MM-DD');
         const voucher_transaction_type = body?.voucher_transaction_type ? body?.voucher_transaction_type : 'none';
         const voucher_bank_name = body?.voucher_bank_name ? body?.voucher_bank_name : '';
+        const voucher_bank_cheque_no = body?.voucher_bank_cheque_no ? body?.voucher_bank_cheque_no : '';
         const voucher_cheque_ref_no = body?.voucher_cheque_ref_no ? body?.voucher_cheque_ref_no : '';
         const voucher_cheque_ref_date = body?.voucher_cheque_ref_date ? body?.voucher_cheque_ref_date : constant.moment().format('YYYY-MM-DD');
         const voucher_amount = body?.voucher_amount ? body?.voucher_amount : 0;
@@ -92,7 +93,8 @@ const AllVoucherApis = {
             voucher_lf_no='${voucher_lf_no}', 
             voucher_date='${voucher_date}', 
             voucher_transaction_type='${voucher_transaction_type}', 
-            voucher_bank_name='${voucher_bank_name}', 
+            voucher_bank_name='${voucher_bank_name}',
+            voucher_bank_cheque_no='${voucher_bank_cheque_no}',
             voucher_cheque_ref_no='${voucher_cheque_ref_no}', 
             voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
             voucher_amount_dollar='${voucher_amount_dollar}', 
@@ -154,8 +156,8 @@ const AllVoucherApis = {
                             const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
                             const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
 
-                            const discount_dollar = data?.discount_dollar ? data?.discount_dollar : 0;
-                            const discount_dirham = data?.discount_dirham ? data?.discount_dirham : 0;
+                            const discount_dollar = data?.discount_dollar ? Number(data?.discount_dollar) : 0;
+                            const discount_dirham = data?.discount_dirham ? Number(data?.discount_dirham) : 0;
 
                             const entry_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
                             const update_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
@@ -386,7 +388,7 @@ const AllVoucherApis = {
             // const createvoucher = `CALL create_voucher(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
             // const createvoucher = `INSERT INTO erp_voucher(user_id, branch_id, company_id, year_id, party_id, bank_from_id, bank_to_id, tds_on_id, nature_of_payment_id, status_id, from_party_id, to_party_id, voucher_type, voucher_no, voucher_lf_no, voucher_date, voucher_transaction_type, voucher_bank_name, voucher_cheque_ref_no, voucher_cheque_ref_date, voucher_amount, voucher_remark, is_print, voucher_cheque_print_name, is_tds_applicable, voucher_amount_per_tds, voucher_tds_applicable_rate, voucher_tds, voucher_entry_date, voucher_update_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-            const createvoucher = `INSERT INTO erp_voucher SET user_id='${user_id}', branch_id='${branch_id}', company_id='${company_id}', year_id='${year_id}', party_id='${party_id}', bank_from_id='${bank_from_id}', bank_to_id='${bank_to_id}', tds_on_id='${tds_on_id}', nature_of_payment_id='${nature_of_payment_id}', status_id='${status_id}', from_party_id='${from_party_id}', to_party_id='${to_party_id}', voucher_type='${voucher_type}', voucher_no='${voucher_no}', voucher_lf_no='${voucher_lf_no}', voucher_date='${voucher_date}', voucher_transaction_type='${voucher_transaction_type}', voucher_bank_name='${voucher_bank_name}', voucher_cheque_ref_no='${voucher_cheque_ref_no}', voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
+            const createvoucher = `INSERT INTO erp_voucher SET user_id='${user_id}', branch_id='${branch_id}', company_id='${company_id}', year_id='${year_id}', party_id='${party_id}', bank_from_id='${bank_from_id}', bank_to_id='${bank_to_id}', tds_on_id='${tds_on_id}', nature_of_payment_id='${nature_of_payment_id}', status_id='${status_id}', from_party_id='${from_party_id}', to_party_id='${to_party_id}', voucher_type='${voucher_type}', voucher_no='${voucher_no}', voucher_lf_no='${voucher_lf_no}', voucher_date='${voucher_date}', voucher_transaction_type='${voucher_transaction_type}', voucher_bank_name='${voucher_bank_name}', voucher_bank_cheque_no='${voucher_bank_cheque_no}', voucher_cheque_ref_no='${voucher_cheque_ref_no}', voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
             voucher_amount='${voucher_amount}', 
             voucher_amount_dollar='${voucher_amount_dollar}', 
             voucher_amount_dirham='${voucher_amount_dirham}', 
@@ -947,7 +949,10 @@ const AllVoucherApis = {
         const party_id = body?.party_id ? body?.party_id : 0;
         const voucher_type = body?.voucher_type ? body?.voucher_type : '';
         const voucher_id = body?.voucher_id ?? 0;
+        console.log("voucher_id::", voucher_id);   
         const voucher_child_id = body?.voucher_child_id ? body?.voucher_child_id : 0;
+        console.log("voucher_child_id::", voucher_child_id);
+        
 
         if (user_id.length == 0 || user_id == 0) {
             res?.send({ Status: 400, Count: 0, Message: 'Enter User ID', Data: [] });
@@ -1022,6 +1027,7 @@ const AllVoucherApis = {
                     tax_par.id AS ref_id,
                     tax_par.id AS invoice_no,
                     tax_par.date,
+                    party.party_name,
                     calc.total_amount_dollar,
                     calc.total_amount_dirham,
                     "0" AS bill_tds,
@@ -1113,6 +1119,7 @@ const AllVoucherApis = {
                         SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dollar), 0)
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.voucher_child_invoice_type = 'sale'
                         AND voucher.is_delete_status = '0'
                     ) AS discount_dollar,
@@ -1121,6 +1128,7 @@ const AllVoucherApis = {
                         SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dirham), 0)
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.voucher_child_invoice_type = 'sale'
                         AND voucher.is_delete_status = '0'
                     ) AS discount_dirham
@@ -1133,19 +1141,23 @@ const AllVoucherApis = {
                 LEFT JOIN 
                     partys AS party ON party.id = tax_par.party_name
                     LEFT JOIN 
-                      erp_voucher_child AS child ON child.tax_invoice_id = tax_par.id -- Added join to include voucher_child_id
+                      erp_voucher_child AS child ON child.tax_invoice_id = tax_par.id 
                 LEFT JOIN 
                     Calculations AS calc ON tax_par.id = calc.tax_par_id
                 WHERE 
                     tax_par.party_name = '${party_id}' 
+                    AND 
+                child.is_delete_status = '0'
                 GROUP BY  
                     blrcl.sales_order_id;`
 
 
-            // console.log("getsalesinvoicedata::", getsalesinvoicedata);
+            console.log("getsalesinvoicedata::", getsalesinvoicedata);
 
             conn.query(getsalesinvoicedata, (error, data) => {
 
+                console.log("data::", data);
+                
                 if (error || data?.length == 0) {
                     res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
                     next();
