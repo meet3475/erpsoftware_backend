@@ -8,6 +8,7 @@ const AllVoucherApis = {
 
         let body = req?.body;
         let child_data = req?.body?.voucher_child_data;
+        let sale_expensess = req?.body?.sale_expensess;
         let bank_data = req?.body?.bank_cheque_data;
         const id = body?.id ? Number(body?.id) : 0;
         const user_id = body?.user_id ? body?.user_id : 0;
@@ -28,6 +29,7 @@ const AllVoucherApis = {
         const voucher_date = body?.voucher_date ? body?.voucher_date : constant.moment().format('YYYY-MM-DD');
         const voucher_transaction_type = body?.voucher_transaction_type ? body?.voucher_transaction_type : 'none';
         const voucher_bank_name = body?.voucher_bank_name ? body?.voucher_bank_name : '';
+        const voucher_bank_cheque_no = body?.voucher_bank_cheque_no ? body?.voucher_bank_cheque_no : '';
         const voucher_cheque_ref_no = body?.voucher_cheque_ref_no ? body?.voucher_cheque_ref_no : '';
         const voucher_cheque_ref_date = body?.voucher_cheque_ref_date ? body?.voucher_cheque_ref_date : constant.moment().format('YYYY-MM-DD');
         const voucher_amount = body?.voucher_amount ? body?.voucher_amount : 0;
@@ -42,6 +44,10 @@ const AllVoucherApis = {
         const voucher_tds = body?.voucher_tds ? body?.voucher_tds : 0;
         const entry_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
         const update_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
+
+        console.log("Createvoucher body:: ", body);
+        console.log("child data:: ", child_data);
+        console.log("sale_expensess:: ", sale_expensess);
 
         if (user_id.length == 0 || user_id == 0) {
             res?.send({ Status: 400, Count: 0, Message: 'Enter User ID', Data: [] });
@@ -87,7 +93,8 @@ const AllVoucherApis = {
             voucher_lf_no='${voucher_lf_no}', 
             voucher_date='${voucher_date}', 
             voucher_transaction_type='${voucher_transaction_type}', 
-            voucher_bank_name='${voucher_bank_name}', 
+            voucher_bank_name='${voucher_bank_name}',
+            voucher_bank_cheque_no='${voucher_bank_cheque_no}',
             voucher_cheque_ref_no='${voucher_cheque_ref_no}', 
             voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
             voucher_amount_dollar='${voucher_amount_dollar}', 
@@ -116,6 +123,7 @@ const AllVoucherApis = {
                 else {
                     const newData = data[1][0];
 
+
                     // if (bank_data && bank_data.length > 0) {
                     //     // CALL voucher Bank cheque API //
                     //     res?.send(AllVoucherApis?.createbankcheque(id, bank_data, req?.headers));
@@ -131,6 +139,9 @@ const AllVoucherApis = {
 
                         body.forEach((data, index) => {
                             const id = data?.id ? Number(data?.id) : 0;
+                            console.log("voucher_chlid_data:: ", data);
+                            console.log("voucher_chlid_id:: ", id);
+                            
                             const user_id = data?.user_id ? data?.user_id : 0;
                             const party_id = data?.party_id ? data?.party_id : 0;
                             const voucher_id = newData.voucher_id ? newData.voucher_id : 0;
@@ -144,6 +155,10 @@ const AllVoucherApis = {
                             const voucher_child_received_amount = data?.voucher_child_received_amount ? Number(data?.voucher_child_received_amount) : 0;
                             const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
                             const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
+
+                            const discount_dollar = data?.discount_dollar ? Number(data?.discount_dollar) : 0;
+                            const discount_dirham = data?.discount_dirham ? Number(data?.discount_dirham) : 0;
+
                             const entry_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
                             const update_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
 
@@ -166,14 +181,21 @@ const AllVoucherApis = {
                                 voucher_child_received_amount='${voucher_child_received_amount}', 
                                 voucher_child_balance_dollar='${voucher_child_balance_dollar}', 
                                 voucher_child_balance_dirham='${voucher_child_balance_dirham}', 
+
+                                voucher_child_disc_amt_dollar='${discount_dollar}', 
+                                voucher_child_disc_amt_dirham='${discount_dirham}', 
+
                                 voucher_child_update_date='${update_date}'
                                 WHERE id='${id}'; 
                                 SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`;
 
                                 console.log("updatevoucherchild::", updatevoucherchild);
 
+
                                 // conn.query(updatevoucherchild, value, (error, data) => {
                                 conn.query(updatevoucherchild, (error, data) => {
+                                    console.log("data:: ", data);
+
 
                                     if (error) {
                                         return ({ Status: 400, Count: 0, Message: 'Data Not Updated!!!!', Data: error });
@@ -187,6 +209,176 @@ const AllVoucherApis = {
                         });
                     }
 
+                    // if (sale_expensess && sale_expensess?.length > 0) {
+
+                    //     let body = sale_expensess;
+                    //     // const sale_expensess = data.sale_expensess ??  [];
+                    //     // console.log("express data :: ", sale_expensess);
+
+                    //     // const updatereceiptexpenses = ``
+
+                    //     body.forEach((data, index) => {
+                    //         console.log("Processing record:", data);
+
+                    //         const id = data?.sales_invoice_expenses_id ? Number(data?.sales_invoice_expenses_id) : 0;
+                    //         console.log("Expense ID:", id);
+                    //         const user_id = newData.user_id ? newData.user_id : 0;
+                    //         const voucher_id = newData.voucher_id ? newData.voucher_id : 0;
+                    //         const voucher_child_id = newData.voucher_child_id ? newData.voucher_child_id : 0;
+                    //         const expenses_type = data?.expensess_id ? data?.expensess_id : 0;
+                    //         const expenses_amount_dirham = data?.expeness_rate_dirham ? data?.expeness_rate_dirham : 0;
+                    //         const expenses_amount_dollar = data?.expeness_rate_dollar ? data?.expeness_rate_dollar : 0;
+                    //         const expenses_created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+                    //         const expenses_updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+
+                    //         const updatereceiptexpenses = `UPDATE voucher_sales_invoice_expenses SET 
+                    //         user_id='${user_id}',
+                    //         voucher_id='${voucher_id}',
+                    //         voucher_child_id='${voucher_child_id}',
+                    //         expenses_type='${expenses_type}',
+                    //         expenses_amount_dirham='${expenses_amount_dirham}',
+                    //         expenses_amount_dollar='${expenses_amount_dollar}',
+                    //         expenses_created_at = '${expenses_created_at}',
+                    //         expenses_updated_at='${expenses_updated_at}'
+                    //        WHERE 
+                    //            id='${id}'; 
+
+                    //        SELECT id as voucher_expenses_id,voucher_sales_invoice_expenses.* FROM voucher_sales_invoice_expenses WHERE id=LAST_INSERT_ID();`;
+
+
+
+                    //         conn.query(updatereceiptexpenses, (error, oldItemData) => {
+
+                    //             if (error) {
+                    //                 return { Status: 400, Count: 0, Message: 'Data Not updated!!!!', Data: error };
+                    //             }
+                    //             else {
+                    //                 //Only for status 200
+                    //                 // return { Status: 200, Count: 0, Message: 'Expesses Inserted', Data: data };
+
+                    //                 // const newItemWithIds = Array.isArray(sale_expensess) ? sale_expensess.map((item) => item.id).filter((id) => id !== undefined) : [];
+                    //                 // console.log("Mapped IDs:", newItemWithIds);
+
+
+                    //             }
+                    //         })
+                    //     })
+                    // }
+
+                    // Assuming you need to fetch the old items from the database based on the voucher_id
+
+                    // sale_expensess update :-
+                    if (sale_expensess && sale_expensess?.length > 0) {
+                    const getOldItemsQuery = `SELECT id FROM voucher_sales_invoice_expenses WHERE voucher_id='${newData.voucher_id}';`;
+
+                    conn.query(getOldItemsQuery, (error, results) => {
+                        if (error) {
+                            console.error("Error fetching old items:", error);
+                            return { Status: 500, Message: "Error fetching old items", Error: error };
+                        }
+
+                        const oldItemData = results; // Assign fetched results to oldItemData
+
+                        // Proceed with the rest of your logic
+                        let body = sale_expensess;
+                        let created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+                        let updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+
+
+                        const newItemWithIds = sale_expensess.map((data) => data?.sales_invoice_expenses_id).filter((id) => id !== undefined);
+                        const filteredOldItems = oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id));
+
+                        console.log("newItemWithIds::", newItemWithIds);
+                        console.log("filteredOldItems::", oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id)));
+                        console.log("filteredOldItems::", filteredOldItems);
+
+
+                        // Handle deletion of old items
+                        const deleteQueries = filteredOldItems.map((item) => {
+                            return new Promise((resolve, reject) => {
+                                const deleteQuery = `
+                                    UPDATE voucher_sales_invoice_expenses 
+                                    SET is_delete_status = '1' 
+                                    WHERE id='${item.id}';
+                                `;
+                                console.log("deleteQuery::", deleteQuery);
+
+                                conn.query(deleteQuery, (error, data) => {
+                                    if (error) {
+                                        reject(error);
+                                    } else {
+                                        resolve(data);
+                                    }
+                                });
+                            });
+                        });
+
+                        Promise.all(deleteQueries)
+                            .then(() => {
+                                // res?.send({ Status: 200, Message: 'Purchase Invoice Inserted Successfully' });
+                            })
+                            .catch((err) => {
+                                res?.send({ Status: 500, Message: 'Error inserting purchase invoice items', Error: err });
+                            });
+
+                        // Handle updates and inserts
+                        const expenseQueries = body.map((data) => {
+
+                            return new Promise((resolve, reject) => {
+                                const id = data?.sales_invoice_expenses_id ? Number(data?.sales_invoice_expenses_id) : 0;
+                                const user_id = newData.user_id ?? 0;
+                                const voucher_id = newData.voucher_id ?? 0;
+                                const voucher_child_id = newData.voucher_child_id ?? 0;
+                                const expenses_type = data?.expensess_id ?? 0;
+                                const expenses_amount_dirham = data?.expeness_rate_dirham ?? 0;
+                                const expenses_amount_dollar = data?.expeness_rate_dollar ?? 0;
+
+                                let query = "";
+                                if (id > 0) {
+                                    query = `
+                                        UPDATE voucher_sales_invoice_expenses 
+                                        SET user_id='${user_id}',
+                                            voucher_id='${voucher_id}',
+                                            voucher_child_id='${voucher_child_id}',
+                                            expenses_type='${expenses_type}',
+                                            expenses_amount_dirham='${expenses_amount_dirham}',
+                                            expenses_amount_dollar='${expenses_amount_dollar}',
+                                            expenses_updated_at='${updated_at}'
+                                        WHERE id='${id}';
+                                    `;
+                                } else {
+                                    query = `
+                                        INSERT INTO voucher_sales_invoice_expenses (
+                                            user_id, voucher_id, voucher_child_id, expenses_type, 
+                                            expenses_amount_dirham, expenses_amount_dollar, expenses_created_at, expenses_updated_at
+                                        ) VALUES (
+                                            '${user_id}', '${voucher_id}', '${voucher_child_id}', '${expenses_type}',
+                                            '${expenses_amount_dirham}', '${expenses_amount_dollar}', '${created_at}', '${updated_at}'
+                                        );
+                                    `;
+                                }
+
+                                conn.query(query, (error, result) => {
+                                    if (error) {
+                                        reject(error);
+                                    } else {
+                                        resolve(result);
+                                    }
+                                });
+                            });
+                        });
+
+                        Promise.all([...deleteQueries, ...expenseQueries])
+                            .then(() => {
+                                return { Status: 200, Message: "Voucher processed successfully" };
+                            })
+                            .catch((err) => {
+                                console.error("Error processing voucher:", err);
+                                return { Status: 500, Message: "Error processing voucher", Error: err };
+                            });
+                    });
+                }
+
                     return res?.send({ Status: 200, Count: 0, Message: 'voucher Updated', Data: [] });
                 }
             });
@@ -196,7 +388,7 @@ const AllVoucherApis = {
             // const createvoucher = `CALL create_voucher(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
             // const createvoucher = `INSERT INTO erp_voucher(user_id, branch_id, company_id, year_id, party_id, bank_from_id, bank_to_id, tds_on_id, nature_of_payment_id, status_id, from_party_id, to_party_id, voucher_type, voucher_no, voucher_lf_no, voucher_date, voucher_transaction_type, voucher_bank_name, voucher_cheque_ref_no, voucher_cheque_ref_date, voucher_amount, voucher_remark, is_print, voucher_cheque_print_name, is_tds_applicable, voucher_amount_per_tds, voucher_tds_applicable_rate, voucher_tds, voucher_entry_date, voucher_update_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-            const createvoucher = `INSERT INTO erp_voucher SET user_id='${user_id}', branch_id='${branch_id}', company_id='${company_id}', year_id='${year_id}', party_id='${party_id}', bank_from_id='${bank_from_id}', bank_to_id='${bank_to_id}', tds_on_id='${tds_on_id}', nature_of_payment_id='${nature_of_payment_id}', status_id='${status_id}', from_party_id='${from_party_id}', to_party_id='${to_party_id}', voucher_type='${voucher_type}', voucher_no='${voucher_no}', voucher_lf_no='${voucher_lf_no}', voucher_date='${voucher_date}', voucher_transaction_type='${voucher_transaction_type}', voucher_bank_name='${voucher_bank_name}', voucher_cheque_ref_no='${voucher_cheque_ref_no}', voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
+            const createvoucher = `INSERT INTO erp_voucher SET user_id='${user_id}', branch_id='${branch_id}', company_id='${company_id}', year_id='${year_id}', party_id='${party_id}', bank_from_id='${bank_from_id}', bank_to_id='${bank_to_id}', tds_on_id='${tds_on_id}', nature_of_payment_id='${nature_of_payment_id}', status_id='${status_id}', from_party_id='${from_party_id}', to_party_id='${to_party_id}', voucher_type='${voucher_type}', voucher_no='${voucher_no}', voucher_lf_no='${voucher_lf_no}', voucher_date='${voucher_date}', voucher_transaction_type='${voucher_transaction_type}', voucher_bank_name='${voucher_bank_name}', voucher_bank_cheque_no='${voucher_bank_cheque_no}', voucher_cheque_ref_no='${voucher_cheque_ref_no}', voucher_cheque_ref_date='${voucher_cheque_ref_date}', 
             voucher_amount='${voucher_amount}', 
             voucher_amount_dollar='${voucher_amount_dollar}', 
             voucher_amount_dirham='${voucher_amount_dirham}', 
@@ -211,7 +403,7 @@ const AllVoucherApis = {
                 }
 
                 const newData = data[1][0];
-
+                // var newData = data[1][0];
 
                 if (child_data && child_data?.length > 0) {
                     // CALL voucher CHILD API //
@@ -234,6 +426,10 @@ const AllVoucherApis = {
                         const voucher_child_received_amount = data?.voucher_child_received_amount ? Number(data?.voucher_child_received_amount) : 0;
                         const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
                         const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
+                        const voucher_child_disc_amt_dollar = data?.discount_dollar ? Number
+                            (data?.discount_dollar) : 0;
+                        const voucher_child_disc_amt_dirham = data?.discount_dirham ? Number
+                            (data?.discount_dirham) : 0;
                         // const company_id = data?.company_id ? data?.company_id : 0;
                         // const year_id = data?.year_id ? data?.year_id : 0;
                         // const branch_id = data?.branch_id ? data?.branch_id : 0;
@@ -246,48 +442,10 @@ const AllVoucherApis = {
                         const update_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
                         // const is_settlement = (voucher_child_invoice_amount == (voucher_child_received_amount + voucher_child_balance)) ? 1 : 0;
 
-                        if (id > 0) {
-                            // Ravi Comment
-                            // const updatevoucherchild = `CALL create_voucher_child(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+                        // Ravi Comment
+                        // const createvoucherchild = `CALL create_voucher_child(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-                            const updatevoucherchild = `UPDATE erp_voucher_child SET user_id='${user_id}', company_id='${company_id}', branch_id='${branch_id}', year_id='${year_id}', party_id='${party_id}', voucher_id='${voucher_id}', tax_invoice_id='${tax_invoice_id}', voucher_child_from_invoice_type='${voucher_child_from_invoice_type}', voucher_child_invoice_type='${voucher_child_invoice_type}', voucher_child_invoice_no='${voucher_child_invoice_no}', voucher_child_invoice_date='${voucher_child_invoice_date}', voucher_child_invoice_amount='${voucher_child_invoice_amount}', voucher_child_invoice_tds='${voucher_child_invoice_tds}', voucher_child_received_amount='${voucher_child_received_amount}', voucher_child_disc_per='${voucher_child_disc_per}', voucher_child_disc_amt='${voucher_child_disc_amt}', voucher_child_balance='${voucher_child_balance}', voucher_child_tds_per='${voucher_child_tds_per}', voucher_child_tds_amt,voucher_child_entry_date=voucher_child_entry_date, voucher_child_update_date='${update_date}' WHERE id='${id}'; SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`;
-
-                            // const value = [id, user_id, company_id, branch_id, year_id, party_id, voucher_id, tax_invoice_id, voucher_child_from_invoice_type, voucher_child_invoice_type, voucher_child_invoice_no, voucher_child_invoice_date, voucher_child_invoice_amount, voucher_child_invoice_tds, voucher_child_received_amount, voucher_child_disc_per, voucher_child_disc_amt, voucher_child_balance, voucher_child_tds_per, voucher_child_tds_amt, entry_date, update_date];
-
-                            // conn.query(updatevoucherchild, value, (error, data) => {
-                            conn.query(updatevoucherchild, (error, data) => {
-
-                                if (error) {
-                                    return ({ Status: 400, Count: 0, Message: 'Data Not Updated!!!!', Data: error });
-                                }
-                                else {
-
-                                    // Ravi Comment Stop entry of activity in USER ACTIVITY TABLE
-
-                                    // INSERT USER ACTIVITY LOG IN TABLE //
-                                    // const HeaderData = JSON.parse(JSON.stringify(header_data));
-                                    // const ip = `voucher Child Updated With This Device ID ${HeaderData.device_id} `;
-                                    // const loginuserdetails = `CALL get_user_details(?)`;
-                                    // conn.query(loginuserdetails, [user_id], function (error, userdata) {
-                                    //     if (userdata[0]) {
-                                    //         const loginactivitylog = `CALL create_all_activity_log(?,?,?,?,?,?)`;
-                                    //         conn.query(loginactivitylog, [user_id, 0, userdata[0][0].user_position, ip, `voucher Child`, entry_date], function (error, data) {
-
-                                    //         });
-                                    //     }
-                                    // });
-                                    // return ({ Status: 200, Count: 0, Message: 'voucher Child Updated', Data: [] });
-
-                                    //Only for status 200
-                                    return ({ Status: 200, Count: 0, Message: 'voucher Child Updated', Data: data?.length > 0 ? data[0] : [] });
-                                }
-                            });
-                        }
-                        else {
-                            // Ravi Comment
-                            // const createvoucherchild = `CALL create_voucher_child(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
-
-                            const createvoucherchild = `
+                        const createvoucherchild = `
                             INSERT INTO erp_voucher_child SET 
                             user_id='${user_id}', 
                             party_id='${party_id}', 
@@ -299,6 +457,11 @@ const AllVoucherApis = {
                             voucher_child_invoice_date='${voucher_child_invoice_date}', 
                             voucher_child_invoice_amount_dollar='${voucher_child_invoice_amount_dollar}', 
                             voucher_child_invoice_amount_dirham='${voucher_child_invoice_amount_dirham}', 
+                            
+                            
+                              voucher_child_disc_amt_dollar='${voucher_child_disc_amt_dollar}',
+                               voucher_child_disc_amt_dirham='${voucher_child_disc_amt_dirham}',
+
                             voucher_child_received_amount='${voucher_child_received_amount}', 
                             voucher_child_balance_dollar='${voucher_child_balance_dollar}', 
                             voucher_child_balance_dirham='${voucher_child_balance_dirham}', 
@@ -307,22 +470,75 @@ const AllVoucherApis = {
                             SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`
 
 
-                            // const values = [id, user_id, company_id, branch_id, year_id, party_id, voucher_id, tax_invoice_id, voucher_child_from_invoice_type, voucher_child_invoice_type, voucher_child_invoice_no, voucher_child_invoice_date, voucher_child_invoice_amount, voucher_child_invoice_tds, voucher_child_received_amount, voucher_child_disc_per, voucher_child_disc_amt, voucher_child_balance, voucher_child_tds_per, voucher_child_tds_amt, entry_date, update_date]
+                        // const values = [id, user_id, company_id, branch_id, year_id, party_id, voucher_id, tax_invoice_id, voucher_child_from_invoice_type, voucher_child_invoice_type, voucher_child_invoice_no, voucher_child_invoice_date, voucher_child_invoice_amount, voucher_child_invoice_tds, voucher_child_received_amount, voucher_child_disc_per, voucher_child_disc_amt, voucher_child_balance, voucher_child_tds_per, voucher_child_tds_amt, entry_date, update_date]
 
-                            // conn.query(createvoucherchild, values, (error, data) => {
+                        // conn.query(createvoucherchild, values, (error, data) => {
 
-                            conn.query(createvoucherchild, (error, data) => {
+                        conn.query(createvoucherchild, (error, data) => {
 
-                                if (error) {
-                                    return { Status: 400, Count: 0, Message: 'Data Not Inserted!!!!', Data: error };
-                                }
-                                else {
-                                    //Only for status 200
-                                    return { Status: 200, Count: 0, Message: 'voucher Child Inserted', Data: data };
-                                }
-                            });
-                        }
+                            if (error) {
+                                return { Status: 400, Count: 0, Message: 'Data Not Inserted!!!!', Data: error };
+                            }
+                            else {
+                                //Only for status 200
+                                return { Status: 200, Count: 0, Message: 'voucher Child Inserted', Data: data };
+                            }
+                        });
                     });
+
+                }
+
+                if (sale_expensess && sale_expensess?.length > 0) {
+                    // CALL voucher CHILD API //
+                    // res?.send(AllVoucherApis?.createvoucherchild(newData.voucher_id, child_data, {}));
+
+                    let body = sale_expensess;
+
+                    body.forEach((data, index) => {
+
+                        // const id = data?.id ? Number(data?.id) : 0;
+                        const user_id = newData.user_id ? newData.user_id : 0;
+                        const voucher_id = newData.voucher_id ? newData.voucher_id : 0;
+                        const voucher_child_id = newData.voucher_child_id ? newData.voucher_child_id : 0;
+
+
+                        const expenses_type = data?.expensess_id ? data?.expensess_id : 0;
+                        const expenses_amount_dirham = data?.expeness_rate_dirham ? data?.expeness_rate_dirham : 0;
+                        const expenses_amount_dollar = data?.expeness_rate_dollar ? data?.expeness_rate_dollar : 0;
+                        const expenses_created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+                        const expenses_updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+
+                        // const createvoucherchild = ``;
+
+                        const createreceiptexpenses =
+                            `INSERT INTO voucher_sales_invoice_expenses SET 
+                            user_id='${user_id}',
+                            voucher_id='${voucher_id}',
+                            voucher_child_id='${voucher_child_id}',
+                            expenses_type='${expenses_type}',
+                            expenses_amount_dirham='${expenses_amount_dirham}',
+                            expenses_amount_dollar='${expenses_amount_dollar}',
+                            expenses_created_at='${expenses_created_at}',
+                            expenses_updated_at='${expenses_updated_at}';
+
+                            SELECT id as voucher_expenses_id,voucher_sales_invoice_expenses.* FROM voucher_sales_invoice_expenses WHERE id=LAST_INSERT_ID();`;
+
+                        // const values = [id, user_id, company_id, branch_id, year_id, party_id, voucher_id, tax_invoice_id, voucher_child_from_invoice_type, voucher_child_invoice_type, voucher_child_invoice_no, voucher_child_invoice_date, voucher_child_invoice_amount, voucher_child_invoice_tds, voucher_child_received_amount, voucher_child_disc_per, voucher_child_disc_amt, voucher_child_balance, voucher_child_tds_per, voucher_child_tds_amt, entry_date, update_date]
+
+                        // conn.query(createvoucherchild, values, (error, data) => {
+
+                        conn.query(createreceiptexpenses, (error, data) => {
+
+                            if (error) {
+                                return { Status: 400, Count: 0, Message: 'Data Not Inserted!!!!', Data: error };
+                            }
+                            else {
+                                //Only for status 200
+                                return { Status: 200, Count: 0, Message: 'Expesses Inserted', Data: data };
+                            }
+                        });
+                    });
+
                 }
 
                 if (bank_data && bank_data.length > 0) {
@@ -337,21 +553,90 @@ const AllVoucherApis = {
     },
 
     // GET voucher AND CHILD DETAILS DATA API //
+    // getvoucherdetails: (req, res, next) => {
+
+    //     const voucher_id = req.body?.voucher_id ? req.body?.voucher_id : 0;
+    //     if (voucher_id.length == 0 || voucher_id == 0) {
+    //         res?.send({ Status: 400, Count: 0, Message: 'Enter voucher ID', Data: [] });
+    //         next();
+    //         return;
+    //     }
+
+    //     // var getvoucherdetails = `CALL get_voucher_details(?)`;
+    //     var getvoucherdetails = `SELECT *,NULL AS voucher_child_data,NULL as bank_cheque_data FROM erp_voucher WHERE id='${voucher_id}' AND is_delete_status='0';
+    // SELECT voucher_child.* FROM erp_voucher_child as voucher_child WHERE voucher_child.voucher_id='${voucher_id}' AND voucher_child.is_delete_status='0';`;
+
+    //     // conn.query(getvoucherdetails, [voucher_id], (error, data) => {
+    //     conn.query(getvoucherdetails, (error, data) => {
+
+    //         if (error || data[0]?.length == 0) {
+    //             res?.send({ Status: 400, Count: 0, Message: ' voucher Data Not Found!!!!', Data: error });
+    //             next();
+    //             return;
+    //         }
+    //         else {
+    //             data[0][0].voucher_child_data = data[1];
+    //             data[0][0].bank_cheque_data = data[2];
+
+    //             data[0][0].voucher_date = constant.moment(data[0][0].voucher_date).format('YYYY-MM-DD');
+    //             data[0][0].voucher_cheque_ref_date = constant.moment(data[0][0].voucher_cheque_ref_date).format('YYYY-MM-DD');
+
+    //             data?.length > 0 && data[1].forEach(childdata => {
+    //                 childdata.voucher_child_invoice_date = constant.moment(childdata.voucher_child_invoice_date).format('YYYY-MM-DD');
+    //             });
+
+    //             // data?.length > 0 && data[2].forEach(bankdata => {
+    //             //     bankdata.bank_cheque_date = constant.moment(bankdata.bank_cheque_date).format('YYYY-MM-DD');
+    //             // });
+
+    //             res?.send({ Status: 200, Count: data[0]?.length, Message: 'Data found', Data: data[0][0] });
+    //             next();
+    //             return;
+    //         }
+    //     });
+    // },
+
     getvoucherdetails: (req, res, next) => {
 
         const voucher_id = req.body?.voucher_id ? req.body?.voucher_id : 0;
+        const voucher_type = req.body?.voucher_type ? req.body?.voucher_type : 0;
         if (voucher_id.length == 0 || voucher_id == 0) {
             res?.send({ Status: 400, Count: 0, Message: 'Enter voucher ID', Data: [] });
             next();
             return;
         }
-
         // var getvoucherdetails = `CALL get_voucher_details(?)`;
-        var getvoucherdetails = `SELECT *,NULL AS voucher_child_data,NULL as bank_cheque_data FROM erp_voucher WHERE id='${voucher_id}' AND is_delete_status='0';
-    SELECT voucher_child.* FROM erp_voucher_child as voucher_child WHERE voucher_child.voucher_id='${voucher_id}' AND voucher_child.is_delete_status='0';`;
+        let getvoucherdetails = ``;
 
+        if (voucher_type === "receipt") {
+            getvoucherdetails = `
+                SELECT *, NULL AS voucher_child_data, NULL AS bank_cheque_data 
+                FROM erp_voucher 
+                WHERE id='${voucher_id}' AND is_delete_status='0';
+
+                SELECT voucher_child.* 
+                FROM erp_voucher_child AS voucher_child 
+                WHERE voucher_child.voucher_id='${voucher_id}' AND voucher_child.is_delete_status='0';
+
+                SELECT 
+                   sales_invoice_expenses.id AS sales_invoice_expenses_id,
+                   sales_invoice_expenses.expenses_type AS expensess_id,
+                   sales_invoice_expenses.expenses_amount_dirham AS expeness_rate_dirham,
+                   sales_invoice_expenses.expenses_amount_dollar AS expeness_rate_dollar
+                FROM voucher_sales_invoice_expenses as sales_invoice_expenses
+                WHERE sales_invoice_expenses.voucher_id = '${voucher_id}' AND sales_invoice_expenses.is_delete_status='0';
+            `;
+
+        }
+        else if (voucher_type === "payment") {
+            getvoucherdetails = `SELECT *,NULL AS voucher_child_data,NULL as bank_cheque_data FROM erp_voucher WHERE id='${voucher_id}' AND is_delete_status='0';
+            SELECT voucher_child.* FROM erp_voucher_child as voucher_child WHERE voucher_child.voucher_id='${voucher_id}' AND voucher_child.is_delete_status='0';`;
+        }
+        console.log("payment getvoucherdetails::", getvoucherdetails);
+        
         // conn.query(getvoucherdetails, [voucher_id], (error, data) => {
         conn.query(getvoucherdetails, (error, data) => {
+
 
             if (error || data[0]?.length == 0) {
                 res?.send({ Status: 400, Count: 0, Message: ' voucher Data Not Found!!!!', Data: error });
@@ -360,7 +645,12 @@ const AllVoucherApis = {
             }
             else {
                 data[0][0].voucher_child_data = data[1];
-                data[0][0].bank_cheque_data = data[2];
+
+                if (voucher_type === "receipt") {
+                    data[0][0].sale_expensess = data[2];
+                } else {
+                    data[0][0].bank_cheque_data = data[2];
+                }
 
                 data[0][0].voucher_date = constant.moment(data[0][0].voucher_date).format('YYYY-MM-DD');
                 data[0][0].voucher_cheque_ref_date = constant.moment(data[0][0].voucher_cheque_ref_date).format('YYYY-MM-DD');
@@ -535,6 +825,8 @@ const AllVoucherApis = {
             const voucher_child_received_amount = data?.voucher_child_received_amount ? Number(data?.voucher_child_received_amount) : 0;
             const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
             const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
+            const discount_dollar = data?.discount_dollar ? Number(data?.discount_dollar) : 0;
+            const discount_dirham = data?.discount_dirham ? Number(data?.discount_dirham) : 0;
             // const company_id = data?.company_id ? data?.company_id : 0;
             // const year_id = data?.year_id ? data?.year_id : 0;
             // const branch_id = data?.branch_id ? data?.branch_id : 0;
@@ -543,6 +835,7 @@ const AllVoucherApis = {
             // const voucher_child_disc_amt = data?.voucher_child_disc_amt ? data?.voucher_child_disc_amt : 0;
             // const voucher_child_tds_per = data?.voucher_child_tds_per ? data?.voucher_child_tds_per : 0;
             // const voucher_child_tds_amt = data?.voucher_child_tds_amt ? data?.voucher_child_tds_amt : 0;
+
             const entry_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
             const update_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
             // const is_settlement = (voucher_child_invoice_amount == (voucher_child_received_amount + voucher_child_balance)) ? 1 : 0;
@@ -551,7 +844,9 @@ const AllVoucherApis = {
                 // Ravi Comment
                 // const updatevoucherchild = `CALL create_voucher_child(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-                const updatevoucherchild = `UPDATE erp_voucher_child SET user_id='${user_id}', company_id='${company_id}', branch_id='${branch_id}', year_id='${year_id}', party_id='${party_id}', voucher_id='${voucher_id}', tax_invoice_id='${tax_invoice_id}', voucher_child_from_invoice_type='${voucher_child_from_invoice_type}', voucher_child_invoice_type='${voucher_child_invoice_type}', voucher_child_invoice_no='${voucher_child_invoice_no}', voucher_child_invoice_date='${voucher_child_invoice_date}', voucher_child_invoice_amount='${voucher_child_invoice_amount}', voucher_child_invoice_tds='${voucher_child_invoice_tds}', voucher_child_received_amount='${voucher_child_received_amount}', voucher_child_disc_per='${voucher_child_disc_per}', voucher_child_disc_amt='${voucher_child_disc_amt}', voucher_child_balance='${voucher_child_balance}', voucher_child_tds_per='${voucher_child_tds_per}', voucher_child_tds_amt,voucher_child_entry_date=voucher_child_entry_date, voucher_child_update_date='${update_date}' WHERE id='${id}'; SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`;
+                const updatevoucherchild = `UPDATE erp_voucher_child SET user_id='${user_id}', company_id='${company_id}', branch_id='${branch_id}', year_id='${year_id}', party_id='${party_id}', voucher_id='${voucher_id}', tax_invoice_id='${tax_invoice_id}', voucher_child_from_invoice_type='${voucher_child_from_invoice_type}', voucher_child_invoice_type='${voucher_child_invoice_type}', voucher_child_invoice_no='${voucher_child_invoice_no}', voucher_child_invoice_date='${voucher_child_invoice_date}', voucher_child_invoice_amount='${voucher_child_invoice_amount}', voucher_child_invoice_tds='${voucher_child_invoice_tds}', voucher_child_received_amount='${voucher_child_received_amount}', voucher_child_disc_per='${voucher_child_disc_per}', voucher_child_disc_amt='${voucher_child_disc_amt}', 
+                voucher_child_disc_amt_dollar='${discount_dollar}', voucher_child_disc_amt_dirham='${discount_dirham}', 
+                voucher_child_balance='${voucher_child_balance}', voucher_child_tds_per='${voucher_child_tds_per}', voucher_child_tds_amt,voucher_child_entry_date=voucher_child_entry_date, voucher_child_update_date='${update_date}' WHERE id='${id}'; SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`;
 
                 // const value = [id, user_id, company_id, branch_id, year_id, party_id, voucher_id, tax_invoice_id, voucher_child_from_invoice_type, voucher_child_invoice_type, voucher_child_invoice_no, voucher_child_invoice_date, voucher_child_invoice_amount, voucher_child_invoice_tds, voucher_child_received_amount, voucher_child_disc_per, voucher_child_disc_amt, voucher_child_balance, voucher_child_tds_per, voucher_child_tds_amt, entry_date, update_date];
 
@@ -654,7 +949,12 @@ const AllVoucherApis = {
         const party_id = body?.party_id ? body?.party_id : 0;
         const voucher_type = body?.voucher_type ? body?.voucher_type : '';
         const voucher_id = body?.voucher_id ?? 0;
+        console.log("voucher_id::", voucher_id);   
         const voucher_child_id = body?.voucher_child_id ? body?.voucher_child_id : 0;
+        console.log("voucher_child_id::", voucher_child_id);
+        console.log("party_id::", party_id);
+
+        
 
         if (user_id.length == 0 || user_id == 0) {
             res?.send({ Status: 400, Count: 0, Message: 'Enter User ID', Data: [] });
@@ -704,10 +1004,173 @@ const AllVoucherApis = {
 
             const voucher_sale_debit_tds_amt = voucher_child_id != '' ? `,(SELECT COALESCE(SUM(child.voucher_child_tds_amt),0) FROM erp_voucher_child as child WHERE child.id IN (${voucher_child_id}) AND child.tax_invoice_id=return_par.id AND child.voucher_child_invoice_type='saledebitnote') as voucher_child_tds_amt` : '';
 
-            var getpurchasesalemillinvoicedata = `SELECT 'sale' as invoice_type,tax_par.id as sale_tax_id,tax_par.id as ref_id,tax_par.sale_tax_invoice_no as invoice_no,tax_par.sale_tax_invoice_date as invoice_date,tax_par.sale_tax_invoice_total_net_amount as invoice_amount,tax_par.sale_tax_invoice_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') as paid ${voucher_sale_balance} ${voucher_sale_disc_per} ${voucher_sale_disc_amt} ${voucher_sale_tds_amt} FROM erp_sale_tax_invoice as tax_par LEFT JOIN erp_party as party ON party.id=tax_par.buyer_id WHERE tax_par.user_id='${user_id}' AND tax_par.company_id<='${company_id}' AND tax_par.year_id<='${year_id}' AND tax_par.branch_id<='${branch_id}' AND tax_par.buyer_id='${party_id}' AND tax_par.sale_tax_invoice_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND tax_par.is_delete_status='0' UNION ALL SELECT 'saledebitnote' as invoice_type,return_par.id as sale_return_id,return_par.id as ref_id,return_par.sale_return_note_no as invoice_no,return_par.sale_return_date as invoice_date,return_par.sale_return_total_net_amount as invoice_amount,return_par.sale_return_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') as paid ${voucher_sale_debit_balance} ${voucher_sale_debit_disc_per} ${voucher_sale_debit_disc_amt} ${voucher_sale_debit_tds_amt} FROM erp_sale_return as return_par LEFT JOIN erp_party as party ON party.id=return_par.buyer_id WHERE return_par.user_id='${user_id}' AND return_par.company_id<='${company_id}' AND return_par.year_id<='${year_id}' AND return_par.branch_id<='${branch_id}' AND return_par.buyer_id='${party_id}' AND return_par.sale_return_type_id='97' AND return_par.sale_return_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND return_par.is_delete_status='0'`;
+            // var getpurchasesalemillinvoicedata = `SELECT 'sale' as invoice_type,tax_par.id as sale_tax_id,tax_par.id as ref_id,tax_par.sale_tax_invoice_no as invoice_no,tax_par.sale_tax_invoice_date as invoice_date,tax_par.sale_tax_invoice_total_net_amount as invoice_amount,tax_par.sale_tax_invoice_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') as paid ${voucher_sale_balance} ${voucher_sale_disc_per} ${voucher_sale_disc_amt} ${voucher_sale_tds_amt} FROM erp_sale_tax_invoice as tax_par LEFT JOIN erp_party as party ON party.id=tax_par.buyer_id WHERE tax_par.user_id='${user_id}' AND tax_par.company_id<='${company_id}' AND tax_par.year_id<='${year_id}' AND tax_par.branch_id<='${branch_id}' AND tax_par.buyer_id='${party_id}' AND tax_par.sale_tax_invoice_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND tax_par.is_delete_status='0' UNION ALL SELECT 'saledebitnote' as invoice_type,return_par.id as sale_return_id,return_par.id as ref_id,return_par.sale_return_note_no as invoice_no,return_par.sale_return_date as invoice_date,return_par.sale_return_total_net_amount as invoice_amount,return_par.sale_return_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') as paid ${voucher_sale_debit_balance} ${voucher_sale_debit_disc_per} ${voucher_sale_debit_disc_amt} ${voucher_sale_debit_tds_amt} FROM erp_sale_return as return_par LEFT JOIN erp_party as party ON party.id=return_par.buyer_id WHERE return_par.user_id='${user_id}' AND return_par.company_id<='${company_id}' AND return_par.year_id<='${year_id}' AND return_par.branch_id<='${branch_id}' AND return_par.buyer_id='${party_id}' AND return_par.sale_return_type_id='97' AND return_par.sale_return_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND return_par.is_delete_status='0'`;
 
-            conn.query(getpurchasesalemillinvoicedata, (error, data) => {
 
+            const getsalesinvoicedata = `
+                WITH Calculations AS (
+                    SELECT 
+                        tax_par.id AS tax_par_id,
+                        (tax_par.net_weight / tax_par.qty * 
+                        (SELECT COUNT(*) 
+                        FROM bl_request_cet_lists 
+                        WHERE sales_order_id = tax_par.id) * tax_par.rate_dollar) AS total_amount_dollar,
+                        (tax_par.net_weight / tax_par.qty * 
+                        (SELECT COUNT(*) 
+                        FROM bl_request_cet_lists 
+                        WHERE sales_order_id = tax_par.id) * tax_par.rate_dirham) AS total_amount_dirham
+                    FROM 
+                        sales_orders AS tax_par
+                )
+
+                SELECT 
+                    'sale' AS invoice_type,
+                    'webportal' AS releted_name,
+                    tax_par.id AS purchase_tax_id,
+                    tax_par.id AS ref_id,
+                    tax_par.id AS invoice_no,
+                    tax_par.date,
+                    party.party_name,
+                    calc.total_amount_dollar,
+                    calc.total_amount_dirham,
+                    "0" AS bill_tds,
+                    child.id AS voucher_child_id,
+                    (
+                        SELECT COALESCE(SUM(child.voucher_child_balance_dollar), 0) 
+                        FROM erp_voucher_child AS child 
+                        WHERE child.id IN (${voucher_child_id}) 
+                        AND child.tax_invoice_id = tax_par.id 
+                        AND child.voucher_child_invoice_type = 'sale' 
+                        AND child.is_delete_status = '0'
+                    ) AS voucher_child_balance_dollar,
+                    (
+                        SELECT COALESCE(SUM(child.voucher_child_balance_dirham), 0) 
+                        FROM erp_voucher_child AS child 
+                        WHERE child.id IN (${voucher_child_id}) 
+                        AND child.tax_invoice_id = tax_par.id 
+                        AND child.voucher_child_invoice_type = 'sale' 
+                        AND child.is_delete_status = '0'
+                    ) AS voucher_child_balance_dirham,
+                    ROUND(
+                    (
+                        SELECT COALESCE(SUM(voucher.voucher_child_balance_dollar), 0) 
+                        FROM erp_voucher_child AS voucher 
+                        WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.voucher_child_invoice_type = 'sale' 
+                        AND voucher.is_delete_status = '0'
+                    ), 2
+                    ) AS paid_dollar,
+
+                    ROUND(
+                    (
+                        SELECT COALESCE(SUM(voucher.voucher_child_balance_dirham), 0) 
+                        FROM erp_voucher_child AS voucher 
+                        WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.voucher_child_invoice_type = 'sale' 
+                        AND voucher.is_delete_status = '0'
+                    ), 2
+                    ) AS paid_dirham,
+
+                    ROUND(
+                        CASE
+                            WHEN (
+                                SELECT COUNT(*) 
+                                FROM erp_voucher_child AS child 
+                                WHERE child.tax_invoice_id = tax_par.id 
+                                AND child.voucher_child_invoice_type = 'sale' 
+                                AND child.is_delete_status = '0'
+                            ) > 0 THEN (
+                                SELECT COALESCE(
+                                    voucher.voucher_child_invoice_amount_dollar - SUM(voucher.voucher_child_disc_amt_dollar) - SUM(voucher.voucher_child_balance_dollar), 0
+                                ) 
+                                FROM erp_voucher_child AS voucher 
+                                JOIN erp_voucher AS main_voucher 
+                                ON main_voucher.id = voucher.voucher_id 
+                                WHERE voucher.tax_invoice_id = tax_par.id 
+                                AND voucher.voucher_child_invoice_type = 'sale' 
+                                AND voucher.is_delete_status = '0'
+                            )
+                            ELSE calc.total_amount_dollar
+                        END, 2
+                    ) AS pending_amount_dollar,
+
+
+                ROUND (
+                        CASE
+                            WHEN (
+                                SELECT COUNT(*) 
+                                FROM erp_voucher_child AS child 
+                                WHERE child.tax_invoice_id = tax_par.id 
+                                AND child.voucher_child_invoice_type = 'sale' 
+                                AND child.is_delete_status = '0'
+                            ) > 0 THEN (
+                                SELECT COALESCE(
+                                    voucher.voucher_child_invoice_amount_dirham - SUM(voucher.voucher_child_disc_amt_dirham) - SUM(voucher.voucher_child_balance_dirham), 0
+                                ) 
+                                FROM erp_voucher_child AS voucher 
+                                JOIN erp_voucher AS main_voucher 
+                                ON main_voucher.id = voucher.voucher_id 
+                                WHERE voucher.tax_invoice_id = tax_par.id 
+                                AND voucher.voucher_child_invoice_type = 'sale' 
+                                AND voucher.is_delete_status = '0'
+                            )
+                            ELSE calc.total_amount_dirham
+                        END , 2 
+                    ) AS pending_amount_dirham ,
+
+                    (
+                        SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dollar), 0)
+                        FROM erp_voucher_child AS voucher
+                        WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.id IN (${voucher_child_id})
+                        AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.is_delete_status = '0'
+                    ) AS discount_dollar,
+
+                    (
+                        SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dirham), 0)
+                        FROM erp_voucher_child AS voucher
+                        WHERE voucher.tax_invoice_id = tax_par.id 
+                        AND voucher.id IN (${voucher_child_id})
+                        AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.is_delete_status = '0'
+                    ) AS discount_dirham
+
+
+                FROM 
+                    bl_request_cet_lists AS blrcl
+                LEFT JOIN 
+                    sales_orders AS tax_par ON blrcl.sales_order_id = tax_par.id
+                LEFT JOIN 
+                    partys AS party ON party.id = tax_par.party_name
+                    LEFT JOIN 
+                      erp_voucher_child AS child ON child.tax_invoice_id = tax_par.id 
+                LEFT JOIN 
+                    Calculations AS calc ON tax_par.id = calc.tax_par_id
+                WHERE 
+                    tax_par.party_name = '${party_id}' 
+                    AND 
+                child.is_delete_status = '0'
+                GROUP BY  
+                    blrcl.sales_order_id;
+                `;
+            console.log("getsalesinvoicedata::", getsalesinvoicedata);
+            
+            conn.query(getsalesinvoicedata, (error, data) => {
+                
+            // console.log("data getsalesinvoicedata ::", data);
+
+            // if (error || !data[0] || data[0].length === 0) {
+            //     res?.send({ Status: 400, Count: 0, Message: 'Data Not Found!!!!', Data: error });
+            //     next();
+            //     return;
+            // }
+
+            // // // Flatten the nested data if necessary
+            // // const flattenedData = data[0];
+            // const flattenedData = [...data[0], ...data[1]]; // The result from the stored procedure is usually in the first index
+            // console.log("data results ::", data[0],data[1]);
+        
                 if (error || data?.length == 0) {
                     res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
                     next();
@@ -843,9 +1306,6 @@ WHERE
     AND tax_par.party_id = '${party_id}'
     AND tax_par.is_delete_status = '0'
 `;
-
-            console.log("getpurchaseinvoicedata::", getpurchaseinvoicedata);
-
 
             conn.query(getpurchaseinvoicedata, (error, data) => {
 
@@ -1189,8 +1649,30 @@ WHERE
         const entry_date = constant.moment().format('YYYY-MM-DD h:mm:ss');
 
         // var deletevoucherdata = `CALL delete_default_voucher(?,?,?)`;
-        var deletevoucherdata = `UPDATE erp_voucher SET is_delete_status='1',voucher_update_date='${entry_date}' WHERE invoice_id='${id}' AND invoice_type='${type}';
-       UPDATE erp_voucher_child SET is_delete_status='1',voucher_child_update_date='${entry_date}' WHERE voucher_id ='${id}';`;
+        //     var deletevoucherdata = `UPDATE erp_voucher SET is_delete_status='1',voucher_update_date='${entry_date}' WHERE invoice_id='${id}' AND invoice_type='${type}';
+        //    UPDATE erp_voucher_child SET is_delete_status='1',voucher_child_update_date='${entry_date}' WHERE voucher_id ='${id}';`;
+
+        var deletevoucherdata =
+            ` UPDATE erp_voucher 
+                SET 
+                    is_delete_status = '1', 
+                    voucher_update_date = '${entry_date}' 
+                WHERE 
+                    id = '${id}';
+
+                UPDATE erp_voucher_child 
+                SET 
+                    is_delete_status = '1', 
+                    voucher_child_update_date = '${entry_date}' 
+                WHERE 
+                    voucher_id = '${id}';
+
+                UPDATE voucher_sales_invoice_expenses
+                SET 
+                   is_delete_status = '1',
+                   expenses_updated_at = '${entry_date}' 
+                WHERE
+                     voucher_id = '${id}';`;
         // conn.query(deletevoucherdata, [id, type, entry_date], (error, data) => {
         conn.query(deletevoucherdata, (error, data) => {
             if (error) {

@@ -6,69 +6,324 @@ const AllLedgerApis = {
     getledgerlistinglayerone: (req, res, next) => {
 
         // var getaccountdata = `SELECT account_head_id,SUM(party_opening_balance) as amount,opening_balance_type FROM partys WHERE id='${party_id}' AND is_delete_status='0'`;
-        var getaccountdata = `SELECT 
-    party.account_type,
-    account.account_head_name,
-    SUM(
-        (SELECT SUM(
-            CASE 
-                WHEN from_party_id = party.id THEN -ABS(voucher_amount_dollar)
-                ELSE voucher_amount_dollar
-            END
-        )   
-        FROM erp_voucher 
-        WHERE to_party_id = party.id)
-    ) AS credit_amount_dollar,
-    SUM(
-        (SELECT SUM(
-            CASE 
-                WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham)
-                ELSE voucher_amount_dirham
-            END
-        )   
-        FROM erp_voucher 
-        WHERE to_party_id = party.id)
-    ) AS credit_amount_dirham,
-    SUM(
-        (SELECT SUM(
-            CASE 
-                WHEN from_party_id = party.id THEN -ABS(voucher_amount_dollar)
-                ELSE voucher_amount_dollar
-            END
-        )
-        FROM erp_voucher 
-        WHERE from_party_id = party.id)
-    ) AS debit_amount_dollar,
-    SUM(
-        (SELECT SUM(
-            CASE 
-                WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham)
-                ELSE voucher_amount_dirham
-            END
-        )
-        FROM erp_voucher 
-        WHERE from_party_id = party.id)
-    ) AS debit_amount_dirham,
-    (SELECT SUM(CASE 
-        WHEN from_party_id = p.id THEN -ABS(voucher_amount_dollar) 
-        ELSE voucher_amount_dollar 
-     END) 
-     FROM erp_voucher 
-     JOIN partys p ON p.account_type = party.account_type
-     WHERE from_party_id = p.id OR to_party_id = p.id) AS total_amount_dollar,
-     (SELECT SUM(CASE 
-        WHEN from_party_id = p.id THEN -ABS(voucher_amount_dirham) 
-        ELSE voucher_amount_dirham 
-     END) 
-     FROM erp_voucher 
-     JOIN partys p ON p.account_type = party.account_type
-     WHERE from_party_id = p.id OR to_party_id = p.id) AS total_amount_dirham
-     
-FROM 
-    partys AS party 
-JOIN account_masters AS account ON account.id = party.account_type
-GROUP BY 
-    party.account_type;`;
+        //         var getaccountdata = `SELECT 
+        //     party.account_type,
+        //     account.account_head_name,
+        //     SUM(
+        //         (SELECT SUM(
+        //             CASE 
+        //                 WHEN from_party_id = party.id THEN -ABS(voucher_amount_dollar)
+        //                 ELSE voucher_amount_dollar
+        //             END
+        //         )   
+        //         FROM erp_voucher 
+        //         WHERE to_party_id = party.id)
+        //     ) AS credit_amount_dollar,
+        //     SUM(
+        //         (SELECT SUM(
+        //             CASE 
+        //                 WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham)
+        //                 ELSE voucher_amount_dirham
+        //             END
+        //         )   
+        //         FROM erp_voucher 
+        //         WHERE to_party_id = party.id)
+        //     ) AS credit_amount_dirham,
+        //     SUM(
+        //         (SELECT SUM(
+        //             CASE 
+        //                 WHEN from_party_id = party.id THEN -ABS(voucher_amount_dollar)
+        //                 ELSE voucher_amount_dollar
+        //             END
+        //         )
+        //         FROM erp_voucher 
+        //         WHERE from_party_id = party.id)
+        //     ) AS debit_amount_dollar,
+        //     SUM(
+        //         (SELECT SUM(
+        //             CASE 
+        //                 WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham)
+        //                 ELSE voucher_amount_dirham
+        //             END
+        //         )
+        //         FROM erp_voucher 
+        //         WHERE from_party_id = party.id)
+        //     ) AS debit_amount_dirham,
+        //     (SELECT SUM(CASE 
+        //         WHEN from_party_id = p.id THEN -ABS(voucher_amount_dollar) 
+        //         ELSE voucher_amount_dollar 
+        //      END) 
+        //      FROM erp_voucher 
+        //      JOIN partys p ON p.account_type = party.account_type
+        //      WHERE from_party_id = p.id OR to_party_id = p.id) AS total_amount_dollar,
+        //      (SELECT SUM(CASE 
+        //         WHEN from_party_id = p.id THEN -ABS(voucher_amount_dirham) 
+        //         ELSE voucher_amount_dirham 
+        //      END) 
+        //      FROM erp_voucher 
+        //      JOIN partys p ON p.account_type = party.account_type
+        //      WHERE from_party_id = p.id OR to_party_id = p.id) AS total_amount_dirham
+
+        // FROM 
+        //     partys AS party 
+        // JOIN account_masters AS account ON account.id = party.account_type
+        // GROUP BY 
+        //     party.account_type;`;  // meet comment
+
+        var getaccountdata = `SELECT
+            t.id,
+            t.account_head_name,
+            t.credit_amount_dollar,
+            t.credit_amount_dirham,
+            t.debit_amount_dollar,
+            t.debit_amount_dirham,
+            (t.credit_amount_dollar + t.debit_amount_dollar) AS total_amount_dollar,
+            (t.credit_amount_dirham + t.debit_amount_dirham) AS total_amount_dirham
+            FROM
+            (
+                SELECT
+                    account.id,
+                    account.account_head_name,
+                    -- Credit Amount in Dollar
+                    (
+                        CASE
+                            WHEN account.id = 97 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(SUM(expenses_amount_dollar), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            ELSE COALESCE(
+                                SUM(
+                                    (
+                                        SELECT
+                                            SUM(
+                                                CASE
+                                                    WHEN from_party_id = party.id THEN - ABS(voucher_amount_dollar)
+                                                    ELSE voucher_amount_dollar
+                                                END
+                                            )
+                                        FROM
+                                            erp_voucher
+                                        WHERE
+                                            to_party_id = party.id
+                                            AND is_delete_status != '1'
+                                    )
+                                ),
+                                0
+                            )
+                        END
+                    ) AS credit_amount_dollar,
+                    -- Credit Amount in Dirham
+                    (
+                        CASE
+                            WHEN account.id = 97 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(SUM(expenses_amount_dirham), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            ELSE COALESCE(
+                                SUM(
+                                    (
+                                        SELECT
+                                            SUM(
+                                                CASE
+                                                    WHEN from_party_id = party.id THEN - ABS(voucher_amount_dirham)
+                                                    ELSE voucher_amount_dirham
+                                                END
+                                            )
+                                        FROM
+                                            erp_voucher
+                                        WHERE
+                                            to_party_id = party.id
+                                            AND is_delete_status != '1'
+                                    )
+                                ),
+                                0
+                            )
+                        END
+                    ) AS credit_amount_dirham,
+                    -- Debit Amount in Dollar
+                    (
+                        CASE
+                            WHEN account.id = 16 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(- ABS(SUM(expenses_amount_dollar)), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                        LEFT JOIN erp_voucher AS voucher ON voucher_sales_invoice_expenses.voucher_id = voucher.id
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                        AND voucher.voucher_transaction_type IN ('bank', 'netbanking')
+                                ),
+                                0
+                            ) + COALESCE(
+                                (
+                                    SELECT
+                                        SUM(
+                                            CASE
+                                                WHEN from_party_id = party.id THEN - ABS(voucher_amount_dollar)
+                                                ELSE voucher_amount_dollar
+                                            END
+                                        )
+                                    FROM
+                                        erp_voucher
+                                    WHERE
+                                        from_party_id = party.id
+                                        AND is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            WHEN account.id = 18 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(- ABS(SUM(expenses_amount_dollar)), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                        LEFT JOIN erp_voucher AS voucher ON voucher_sales_invoice_expenses.voucher_id = voucher.id
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                        AND voucher.voucher_transaction_type IN ('cash')
+                                ),
+                                0
+                            ) + COALESCE(
+                                (
+                                    SELECT
+                                        SUM(
+                                            CASE
+                                                WHEN from_party_id = party.id THEN - ABS(voucher_amount_dollar)
+                                                ELSE voucher_amount_dollar
+                                            END
+                                        )
+                                    FROM
+                                        erp_voucher
+                                    WHERE
+                                        from_party_id = party.id
+                                        AND is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            ELSE COALESCE(
+                                SUM(
+                                    (
+                                        SELECT
+                                            SUM(
+                                                CASE
+                                                    WHEN from_party_id = party.id THEN - ABS(voucher_amount_dollar)
+                                                    ELSE voucher_amount_dollar
+                                                END
+                                            )
+                                        FROM
+                                            erp_voucher
+                                        WHERE
+                                            from_party_id = party.id
+                                            AND is_delete_status != '1'
+                                    )
+                                ),
+                                0
+                            )
+                        END
+                    ) AS debit_amount_dollar,
+                    -- Debit Amount in Dirham
+                    (
+                        CASE
+                            WHEN account.id = 16 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(- ABS(SUM(expenses_amount_dirham)), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                        LEFT JOIN erp_voucher AS voucher ON voucher_sales_invoice_expenses.voucher_id = voucher.id
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                        AND voucher.voucher_transaction_type IN ('bank', 'netbanking')
+                                ),
+                                0
+                            ) + COALESCE(
+                                (
+                                    SELECT
+                                        SUM(
+                                            CASE
+                                                WHEN from_party_id = party.id THEN - ABS(voucher_amount_dirham)
+                                                ELSE voucher_amount_dirham
+                                            END
+                                        )
+                                    FROM
+                                        erp_voucher
+                                    WHERE
+                                        from_party_id = party.id
+                                        AND is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            WHEN account.id = 18 THEN COALESCE(
+                                (
+                                    SELECT
+                                        COALESCE(- ABS(SUM(expenses_amount_dirham)), 0)
+                                    FROM
+                                        voucher_sales_invoice_expenses
+                                        LEFT JOIN erp_voucher AS voucher ON voucher_sales_invoice_expenses.voucher_id = voucher.id
+                                    WHERE
+                                        voucher_sales_invoice_expenses.is_delete_status != '1'
+                                        AND voucher.voucher_transaction_type IN ('cash')
+                                ),
+                                0
+                            ) + COALESCE(
+                                (
+                                    SELECT
+                                        SUM(
+                                            CASE
+                                                WHEN from_party_id = party.id THEN - ABS(voucher_amount_dirham)
+                                                ELSE voucher_amount_dirham
+                                            END
+                                        )
+                                    FROM
+                                        erp_voucher
+                                    WHERE
+                                        from_party_id = party.id
+                                        AND is_delete_status != '1'
+                                ),
+                                0
+                            )
+                            ELSE COALESCE(
+                                SUM(
+                                    (
+                                        SELECT
+                                            SUM(
+                                                CASE
+                                                    WHEN from_party_id = party.id THEN - ABS(voucher_amount_dirham)
+                                                    ELSE voucher_amount_dirham
+                                                END
+                                            )
+                                        FROM
+                                            erp_voucher
+                                        WHERE
+                                            from_party_id = party.id
+                                            AND is_delete_status != '1'
+                                    )
+                                ),
+                                0
+                            )
+                        END
+                    ) AS debit_amount_dirham
+                FROM
+                    partys AS party
+                    LEFT JOIN account_masters AS account ON account.id = party.account_type
+                GROUP BY
+                    party.account_type
+            ) t;`;
 
         conn.query(getaccountdata, (error, data) => {
             if (error || data?.length == 0)
@@ -109,16 +364,19 @@ GROUP BY
         WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham) 
         ELSE voucher_amount_dirham 
      END)) from erp_voucher where from_party_id=party.id) as debit_amount_dollar,
-    (Select sum((CASE 
+    (Select sum((CASE      
         WHEN from_party_id = party.id THEN -ABS(voucher_amount_dollar) 
         ELSE voucher_amount_dollar 
-     END)) from erp_voucher where from_party_id=party.id OR to_party_id=party.id) as total_amount_dollar,
+     END)) from erp_voucher where from_party_id=party.id OR to_party_id=party.id) as total_amount_dollar,                   
      (Select sum((CASE 
-        WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham) 
-        ELSE voucher_amount_dirham 
+        WHEN from_party_id = party.id THEN -ABS(voucher_amount_dirham)                                                      
+        ELSE voucher_amount_dirham                                  
      END)) from erp_voucher where from_party_id=party.id OR to_party_id=party.id) as total_amount_dirham
 FROM 
     partys AS party JOIN account_masters AS master ON party.account_type=master.id WHERE master.account_head_name LIKE '%${account_head_name}%';`;
+
+        console.log("getaccountdata::", getaccountdata);
+
 
         conn.query(getaccountdata, (error, data) => {
             if (error || data?.length == 0)
@@ -179,6 +437,7 @@ FROM
         });
     },
 
+    // For layer three below API is working not above one
     getledgerlistingdata: (req, res, next) => {
 
         let body = req?.body;

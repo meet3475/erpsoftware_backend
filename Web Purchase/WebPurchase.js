@@ -23,6 +23,7 @@ const WebPurchase = {
         let total_amount_dollar = body.total_amount_dollar ?? 0;
         let remark = body.remark ?? 0;
         let items = body.items ?? [];
+        console.log("items", items);
         let created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
         let updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
 
@@ -179,7 +180,7 @@ const WebPurchase = {
         remark="${remark}",
         created_at='${created_at}',
         updated_at='${updated_at}',
-        is_delete_status='0' ;
+        is_delete_status='0';
         SELECT * FROM purchase_invoice_report WHERE id=LAST_INSERT_ID();
         `;
 
@@ -237,6 +238,8 @@ const WebPurchase = {
 
         let body = req?.body;
         let id = body.id ?? 0;
+        console.log("id::", id);
+        
 
         let getuserlistingdata = `SELECT 
         id,
@@ -257,7 +260,11 @@ const WebPurchase = {
         remark FROM purchase_invoice_report WHERE id=${id};
         `;
 
+        console.log("getuserlistingdata::", getuserlistingdata);
+
         conn.query(getuserlistingdata, (error, data) => {
+
+            console.log("data::", data);
 
             if (error || data?.length == 0) {
                 return res?.send({ Status: 400, Message: 'Data Not Found!!!!', Data: "Invalid Data!!!!" });
