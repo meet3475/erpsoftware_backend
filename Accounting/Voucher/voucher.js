@@ -1131,6 +1131,7 @@ const AllVoucherApis = {
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
                         AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
                     ) AS discount_dollar,
@@ -1140,17 +1141,18 @@ const AllVoucherApis = {
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
                         AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
                     ) AS discount_dirham,
 
                         (SELECT child.id 
-                                            FROM erp_voucher_child AS child 
-                                            WHERE child.tax_invoice_id = tax_par.id 
-                                            AND child.voucher_child_invoice_type = 'sale' 
-                                            AND child.releted_name = 'webportal' 
-                                            AND child.is_delete_status = '0' 
-                                            LIMIT 1) AS voucher_child_id
+                            FROM erp_voucher_child AS child 
+                            WHERE child.tax_invoice_id = tax_par.id 
+                            AND child.voucher_child_invoice_type = 'sale' 
+                            AND child.releted_name = 'webportal' 
+                            AND child.is_delete_status = '0' 
+                        LIMIT 1) AS voucher_child_id
 
 
                 FROM 
@@ -1185,6 +1187,7 @@ const AllVoucherApis = {
                     (SELECT COALESCE(SUM(child.voucher_child_balance_dollar), 0) 
                     FROM erp_voucher_child AS child 
                     WHERE child.tax_invoice_id = tax_par.id 
+                    AND child.id IN (${voucher_child_id}) 
                     AND child.voucher_child_invoice_type = 'sale' 
                     AND child.releted_name = 'accounting'
                     AND child.is_delete_status = '0') AS voucher_child_balance_dollar,
@@ -1192,6 +1195,7 @@ const AllVoucherApis = {
                     (SELECT COALESCE(SUM(child.voucher_child_balance_dirham), 0) 
                     FROM erp_voucher_child AS child 
                     WHERE child.tax_invoice_id = tax_par.id 
+                    AND child.id IN (${voucher_child_id}) 
                     AND child.voucher_child_invoice_type = 'sale'
                     AND child.releted_name = 'accounting'
                     AND child.is_delete_status = '0') AS voucher_child_balance_dirham,
@@ -1260,6 +1264,7 @@ const AllVoucherApis = {
                                             FROM erp_voucher_child AS voucher
                                             WHERE voucher.tax_invoice_id = tax_par.id 
                                             AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.id IN (${voucher_child_id})
                                             AND voucher.releted_name = 'accounting'
                                             AND voucher.is_delete_status = '0'
                                         ) AS discount_dollar,
@@ -1269,6 +1274,7 @@ const AllVoucherApis = {
                                             FROM erp_voucher_child AS voucher
                                             WHERE voucher.tax_invoice_id = tax_par.id 
                                             AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.id IN (${voucher_child_id})
                                             AND voucher.releted_name = 'accounting'
                                             AND voucher.is_delete_status = '0'
                                         ) AS discount_dirham,
@@ -1289,8 +1295,6 @@ const AllVoucherApis = {
                             AND child.voucher_child_invoice_type = 'sale'
                             AND child.is_delete_status = '0'
                     ) AS is_editable
-   
-
                 FROM 
                     sales_invoice_report AS tax_par
                 LEFT JOIN 
