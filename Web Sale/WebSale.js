@@ -307,7 +307,7 @@ const WebSale = {
         const user_id = body.user_id ?? 0;
         console.log(user_id);
 
-        const getsaleslistingdata = `CALL saleInvoiceReport(); 
+        const getsaleslistingdata = `CALL saleInvoiceReport();                 
                 SELECT   
                     CONCAT('ACC-', LPAD(sales.id, 2, '0')) AS invoice_no, 
                     sales.id AS id,
@@ -333,6 +333,7 @@ const WebSale = {
                                 WHERE 
                                     child.tax_invoice_id = sales.id 
                                     AND child.voucher_child_invoice_type = 'sale'
+                                    AND child.releted_name = 'accounting'
                                     AND child.is_delete_status = '0'
                             ) > 0 THEN (
                                 SELECT COALESCE(
@@ -347,6 +348,7 @@ const WebSale = {
                                 WHERE 
                                     voucher.tax_invoice_id = sales.id
                                     AND voucher.voucher_child_invoice_type = 'sale'
+                                     AND voucher.releted_name = 'accounting'
                                     AND voucher.is_delete_status = '0'
                             )
                             ELSE sales.total_amount_dollar
@@ -361,6 +363,7 @@ const WebSale = {
                                 WHERE 
                                     child.tax_invoice_id = sales.id 
                                     AND child.voucher_child_invoice_type = 'sale' 
+                                     AND child.releted_name = 'accounting'
                                     AND child.is_delete_status = '0'
                             ) > 0 THEN (
                                 SELECT COALESCE(
@@ -375,6 +378,7 @@ const WebSale = {
                                 WHERE 
                                     voucher.tax_invoice_id = sales.id 
                                     AND voucher.voucher_child_invoice_type = 'sale' 
+                                     AND voucher.releted_name = 'accounting'
                                     AND voucher.is_delete_status = '0'
                             )
                             ELSE sales.total_amount_dirham
@@ -387,6 +391,7 @@ const WebSale = {
                             FROM erp_voucher_child AS voucher 
                             WHERE voucher.tax_invoice_id = sales.id 
                             AND voucher.voucher_child_invoice_type = 'sale' 
+                             AND voucher.releted_name = 'accounting'
                             AND voucher.is_delete_status = '0'
                         ), 2
                     ) AS paid_dollar,
@@ -397,6 +402,7 @@ const WebSale = {
                             FROM erp_voucher_child AS voucher 
                             WHERE voucher.tax_invoice_id = sales.id 
                             AND voucher.voucher_child_invoice_type = 'sale' 
+                             AND voucher.releted_name = 'accounting'
                             AND voucher.is_delete_status = '0'
                         ), 2
                     ) AS paid_dirham,

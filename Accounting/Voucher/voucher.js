@@ -1007,7 +1007,7 @@ const AllVoucherApis = {
             // var getpurchasesalemillinvoicedata = `SELECT 'sale' as invoice_type,tax_par.id as sale_tax_id,tax_par.id as ref_id,tax_par.sale_tax_invoice_no as invoice_no,tax_par.sale_tax_invoice_date as invoice_date,tax_par.sale_tax_invoice_total_net_amount as invoice_amount,tax_par.sale_tax_invoice_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') as paid ${voucher_sale_balance} ${voucher_sale_disc_per} ${voucher_sale_disc_amt} ${voucher_sale_tds_amt} FROM erp_sale_tax_invoice as tax_par LEFT JOIN erp_party as party ON party.id=tax_par.buyer_id WHERE tax_par.user_id='${user_id}' AND tax_par.company_id<='${company_id}' AND tax_par.year_id<='${year_id}' AND tax_par.branch_id<='${branch_id}' AND tax_par.buyer_id='${party_id}' AND tax_par.sale_tax_invoice_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND tax_par.is_delete_status='0' UNION ALL SELECT 'saledebitnote' as invoice_type,return_par.id as sale_return_id,return_par.id as ref_id,return_par.sale_return_note_no as invoice_no,return_par.sale_return_date as invoice_date,return_par.sale_return_total_net_amount as invoice_amount,return_par.sale_return_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') as paid ${voucher_sale_debit_balance} ${voucher_sale_debit_disc_per} ${voucher_sale_debit_disc_amt} ${voucher_sale_debit_tds_amt} FROM erp_sale_return as return_par LEFT JOIN erp_party as party ON party.id=return_par.buyer_id WHERE return_par.user_id='${user_id}' AND return_par.company_id<='${company_id}' AND return_par.year_id<='${year_id}' AND return_par.branch_id<='${branch_id}' AND return_par.buyer_id='${party_id}' AND return_par.sale_return_type_id='97' AND return_par.sale_return_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND return_par.is_delete_status='0'`;
 
 
-            const getsalesinvoicedata = `                
+            const getsalesinvoicedata =`                
                 WITH Calculations AS (
                     SELECT 
                         tax_par.id AS tax_par_id,
@@ -1314,7 +1314,7 @@ const AllVoucherApis = {
                 console.log("data results ::", data[1]);
 
 
-                if (error || !data[0] || data[0].length === 0) {
+                if (error || !data[0] || data?.length === 0) {
                     res?.send({ Status: 400, Count: 0, Message: 'Data Not Found!!!!', Data: error });
                     next();
                     return;
@@ -1328,8 +1328,6 @@ const AllVoucherApis = {
                     next();
                     return;
                 }
-
-
 
                 // if (error || data?.length == 0) {
                 //     res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
