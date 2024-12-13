@@ -402,6 +402,24 @@ const WebSale = {
                     ) AS paid_dirham,
 
                     (
+                                            SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dollar), 0)
+                                            FROM erp_voucher_child AS voucher
+                                            WHERE voucher.tax_invoice_id = sales.id 
+                                            AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.releted_name = 'accounting'
+                                            AND voucher.is_delete_status = '0'
+                                        ) AS discount_dollar,
+
+                                        (
+                                            SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dirham), 0)
+                                            FROM erp_voucher_child AS voucher
+                                            WHERE voucher.tax_invoice_id = sales.id 
+                                            AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.releted_name = 'accounting'
+                                            AND voucher.is_delete_status = '0'
+                                        ) AS discount_dirham,
+
+                    (
                         SELECT 
                             CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
                         FROM erp_voucher_child AS child

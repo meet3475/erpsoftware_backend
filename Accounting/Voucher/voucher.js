@@ -141,7 +141,7 @@ const AllVoucherApis = {
                             const id = data?.id ? Number(data?.id) : 0;
                             console.log("voucher_chlid_data:: ", data);
                             console.log("voucher_chlid_id:: ", id);
-                            
+
                             const user_id = data?.user_id ? data?.user_id : 0;
                             const party_id = data?.party_id ? data?.party_id : 0;
                             const voucher_id = newData.voucher_id ? newData.voucher_id : 0;
@@ -155,7 +155,7 @@ const AllVoucherApis = {
                             const voucher_child_received_amount = data?.voucher_child_received_amount ? Number(data?.voucher_child_received_amount) : 0;
                             const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
                             const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
-
+                            const releted_name = data?.releted_name ? data?.releted_name : '';
                             const discount_dollar = data?.discount_dollar ? Number(data?.discount_dollar) : 0;
                             const discount_dirham = data?.discount_dirham ? Number(data?.discount_dirham) : 0;
 
@@ -181,7 +181,7 @@ const AllVoucherApis = {
                                 voucher_child_received_amount='${voucher_child_received_amount}', 
                                 voucher_child_balance_dollar='${voucher_child_balance_dollar}', 
                                 voucher_child_balance_dirham='${voucher_child_balance_dirham}', 
-
+                                releted_name='${releted_name}', 
                                 voucher_child_disc_amt_dollar='${discount_dollar}', 
                                 voucher_child_disc_amt_dirham='${discount_dirham}', 
 
@@ -269,73 +269,73 @@ const AllVoucherApis = {
 
                     // sale_expensess update :-
                     if (sale_expensess && sale_expensess?.length > 0) {
-                    const getOldItemsQuery = `SELECT id FROM voucher_sales_invoice_expenses WHERE voucher_id='${newData.voucher_id}';`;
+                        const getOldItemsQuery = `SELECT id FROM voucher_sales_invoice_expenses WHERE voucher_id='${newData.voucher_id}';`;
 
-                    conn.query(getOldItemsQuery, (error, results) => {
-                        if (error) {
-                            console.error("Error fetching old items:", error);
-                            return { Status: 500, Message: "Error fetching old items", Error: error };
-                        }
+                        conn.query(getOldItemsQuery, (error, results) => {
+                            if (error) {
+                                console.error("Error fetching old items:", error);
+                                return { Status: 500, Message: "Error fetching old items", Error: error };
+                            }
 
-                        const oldItemData = results; // Assign fetched results to oldItemData
+                            const oldItemData = results; // Assign fetched results to oldItemData
 
-                        // Proceed with the rest of your logic
-                        let body = sale_expensess;
-                        let created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
-                        let updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
-
-
-                        const newItemWithIds = sale_expensess.map((data) => data?.sales_invoice_expenses_id).filter((id) => id !== undefined);
-                        const filteredOldItems = oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id));
-
-                        console.log("newItemWithIds::", newItemWithIds);
-                        console.log("filteredOldItems::", oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id)));
-                        console.log("filteredOldItems::", filteredOldItems);
+                            // Proceed with the rest of your logic
+                            let body = sale_expensess;
+                            let created_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
+                            let updated_at = constant.moment().format('YYYY-MM-DD h:mm:ss');
 
 
-                        // Handle deletion of old items
-                        const deleteQueries = filteredOldItems.map((item) => {
-                            return new Promise((resolve, reject) => {
-                                const deleteQuery = `
+                            const newItemWithIds = sale_expensess.map((data) => data?.sales_invoice_expenses_id).filter((id) => id !== undefined);
+                            const filteredOldItems = oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id));
+
+                            console.log("newItemWithIds::", newItemWithIds);
+                            console.log("filteredOldItems::", oldItemData.filter((oldItem) => !newItemWithIds.includes(oldItem.id)));
+                            console.log("filteredOldItems::", filteredOldItems);
+
+
+                            // Handle deletion of old items
+                            const deleteQueries = filteredOldItems.map((item) => {
+                                return new Promise((resolve, reject) => {
+                                    const deleteQuery = `
                                     UPDATE voucher_sales_invoice_expenses 
                                     SET is_delete_status = '1' 
                                     WHERE id='${item.id}';
                                 `;
-                                console.log("deleteQuery::", deleteQuery);
+                                    console.log("deleteQuery::", deleteQuery);
 
-                                conn.query(deleteQuery, (error, data) => {
-                                    if (error) {
-                                        reject(error);
-                                    } else {
-                                        resolve(data);
-                                    }
+                                    conn.query(deleteQuery, (error, data) => {
+                                        if (error) {
+                                            reject(error);
+                                        } else {
+                                            resolve(data);
+                                        }
+                                    });
                                 });
                             });
-                        });
 
-                        Promise.all(deleteQueries)
-                            .then(() => {
-                                // res?.send({ Status: 200, Message: 'Purchase Invoice Inserted Successfully' });
-                            })
-                            .catch((err) => {
-                                res?.send({ Status: 500, Message: 'Error inserting purchase invoice items', Error: err });
-                            });
+                            Promise.all(deleteQueries)
+                                .then(() => {
+                                    // res?.send({ Status: 200, Message: 'Purchase Invoice Inserted Successfully' });
+                                })
+                                .catch((err) => {
+                                    res?.send({ Status: 500, Message: 'Error inserting purchase invoice items', Error: err });
+                                });
 
-                        // Handle updates and inserts
-                        const expenseQueries = body.map((data) => {
+                            // Handle updates and inserts
+                            const expenseQueries = body.map((data) => {
 
-                            return new Promise((resolve, reject) => {
-                                const id = data?.sales_invoice_expenses_id ? Number(data?.sales_invoice_expenses_id) : 0;
-                                const user_id = newData.user_id ?? 0;
-                                const voucher_id = newData.voucher_id ?? 0;
-                                const voucher_child_id = newData.voucher_child_id ?? 0;
-                                const expenses_type = data?.expensess_id ?? 0;
-                                const expenses_amount_dirham = data?.expeness_rate_dirham ?? 0;
-                                const expenses_amount_dollar = data?.expeness_rate_dollar ?? 0;
+                                return new Promise((resolve, reject) => {
+                                    const id = data?.sales_invoice_expenses_id ? Number(data?.sales_invoice_expenses_id) : 0;
+                                    const user_id = newData.user_id ?? 0;
+                                    const voucher_id = newData.voucher_id ?? 0;
+                                    const voucher_child_id = newData.voucher_child_id ?? 0;
+                                    const expenses_type = data?.expensess_id ?? 0;
+                                    const expenses_amount_dirham = data?.expeness_rate_dirham ?? 0;
+                                    const expenses_amount_dollar = data?.expeness_rate_dollar ?? 0;
 
-                                let query = "";
-                                if (id > 0) {
-                                    query = `
+                                    let query = "";
+                                    if (id > 0) {
+                                        query = `
                                         UPDATE voucher_sales_invoice_expenses 
                                         SET user_id='${user_id}',
                                             voucher_id='${voucher_id}',
@@ -346,8 +346,8 @@ const AllVoucherApis = {
                                             expenses_updated_at='${updated_at}'
                                         WHERE id='${id}';
                                     `;
-                                } else {
-                                    query = `
+                                    } else {
+                                        query = `
                                         INSERT INTO voucher_sales_invoice_expenses (
                                             user_id, voucher_id, voucher_child_id, expenses_type, 
                                             expenses_amount_dirham, expenses_amount_dollar, expenses_created_at, expenses_updated_at
@@ -356,28 +356,28 @@ const AllVoucherApis = {
                                             '${expenses_amount_dirham}', '${expenses_amount_dollar}', '${created_at}', '${updated_at}'
                                         );
                                     `;
-                                }
-
-                                conn.query(query, (error, result) => {
-                                    if (error) {
-                                        reject(error);
-                                    } else {
-                                        resolve(result);
                                     }
+
+                                    conn.query(query, (error, result) => {
+                                        if (error) {
+                                            reject(error);
+                                        } else {
+                                            resolve(result);
+                                        }
+                                    });
                                 });
                             });
-                        });
 
-                        Promise.all([...deleteQueries, ...expenseQueries])
-                            .then(() => {
-                                return { Status: 200, Message: "Voucher processed successfully" };
-                            })
-                            .catch((err) => {
-                                console.error("Error processing voucher:", err);
-                                return { Status: 500, Message: "Error processing voucher", Error: err };
-                            });
-                    });
-                }
+                            Promise.all([...deleteQueries, ...expenseQueries])
+                                .then(() => {
+                                    return { Status: 200, Message: "Voucher processed successfully" };
+                                })
+                                .catch((err) => {
+                                    console.error("Error processing voucher:", err);
+                                    return { Status: 500, Message: "Error processing voucher", Error: err };
+                                });
+                        });
+                    }
 
                     return res?.send({ Status: 200, Count: 0, Message: 'voucher Updated', Data: [] });
                 }
@@ -426,10 +426,9 @@ const AllVoucherApis = {
                         const voucher_child_received_amount = data?.voucher_child_received_amount ? Number(data?.voucher_child_received_amount) : 0;
                         const voucher_child_balance_dollar = data?.voucher_child_balance_dollar ? Number(data?.voucher_child_balance_dollar) : 0;
                         const voucher_child_balance_dirham = data?.voucher_child_balance_dirham ? Number(data?.voucher_child_balance_dirham) : 0;
-                        const voucher_child_disc_amt_dollar = data?.discount_dollar ? Number
-                            (data?.discount_dollar) : 0;
-                        const voucher_child_disc_amt_dirham = data?.discount_dirham ? Number
-                            (data?.discount_dirham) : 0;
+                        const releted_name = data?.releted_name ? data?.releted_name : '';
+                        const voucher_child_disc_amt_dollar = data?.discount_dollar ? Number(data?.discount_dollar) : 0;
+                        const voucher_child_disc_amt_dirham = data?.discount_dirham ? Number(data?.discount_dirham) : 0;
                         // const company_id = data?.company_id ? data?.company_id : 0;
                         // const year_id = data?.year_id ? data?.year_id : 0;
                         // const branch_id = data?.branch_id ? data?.branch_id : 0;
@@ -456,15 +455,13 @@ const AllVoucherApis = {
                             voucher_child_invoice_no='${voucher_child_invoice_no}', 
                             voucher_child_invoice_date='${voucher_child_invoice_date}', 
                             voucher_child_invoice_amount_dollar='${voucher_child_invoice_amount_dollar}', 
-                            voucher_child_invoice_amount_dirham='${voucher_child_invoice_amount_dirham}', 
-                            
-                            
-                              voucher_child_disc_amt_dollar='${voucher_child_disc_amt_dollar}',
-                               voucher_child_disc_amt_dirham='${voucher_child_disc_amt_dirham}',
-
+                            voucher_child_invoice_amount_dirham='${voucher_child_invoice_amount_dirham}',
+                            voucher_child_disc_amt_dollar='${voucher_child_disc_amt_dollar}',
+                            voucher_child_disc_amt_dirham='${voucher_child_disc_amt_dirham}',
                             voucher_child_received_amount='${voucher_child_received_amount}', 
                             voucher_child_balance_dollar='${voucher_child_balance_dollar}', 
-                            voucher_child_balance_dirham='${voucher_child_balance_dirham}', 
+                            voucher_child_balance_dirham='${voucher_child_balance_dirham}',
+                            releted_name='${releted_name}',
                             voucher_child_entry_date='${entry_date}', 
                             voucher_child_update_date='${update_date}'; 
                             SELECT id as voucher_child_id,erp_voucher_child.* FROM erp_voucher_child WHERE id=LAST_INSERT_ID();`
@@ -474,7 +471,10 @@ const AllVoucherApis = {
 
                         // conn.query(createvoucherchild, values, (error, data) => {
 
+                        console.log("createvoucherchild::", createvoucherchild);
+
                         conn.query(createvoucherchild, (error, data) => {
+                            console.log("createvoucherchild_data::", data);
 
                             if (error) {
                                 return { Status: 400, Count: 0, Message: 'Data Not Inserted!!!!', Data: error };
@@ -633,7 +633,7 @@ const AllVoucherApis = {
             SELECT voucher_child.* FROM erp_voucher_child as voucher_child WHERE voucher_child.voucher_id='${voucher_id}' AND voucher_child.is_delete_status='0';`;
         }
         console.log("payment getvoucherdetails::", getvoucherdetails);
-        
+
         // conn.query(getvoucherdetails, [voucher_id], (error, data) => {
         conn.query(getvoucherdetails, (error, data) => {
 
@@ -949,12 +949,12 @@ const AllVoucherApis = {
         const party_id = body?.party_id ? body?.party_id : 0;
         const voucher_type = body?.voucher_type ? body?.voucher_type : '';
         const voucher_id = body?.voucher_id ?? 0;
-        console.log("voucher_id::", voucher_id);   
+        console.log("voucher_id::", voucher_id);
         const voucher_child_id = body?.voucher_child_id ? body?.voucher_child_id : 0;
         console.log("voucher_child_id::", voucher_child_id);
         console.log("party_id::", party_id);
 
-        
+
 
         if (user_id.length == 0 || user_id == 0) {
             res?.send({ Status: 400, Count: 0, Message: 'Enter User ID', Data: [] });
@@ -1007,7 +1007,7 @@ const AllVoucherApis = {
             // var getpurchasesalemillinvoicedata = `SELECT 'sale' as invoice_type,tax_par.id as sale_tax_id,tax_par.id as ref_id,tax_par.sale_tax_invoice_no as invoice_no,tax_par.sale_tax_invoice_date as invoice_date,tax_par.sale_tax_invoice_total_net_amount as invoice_amount,tax_par.sale_tax_invoice_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') as paid ${voucher_sale_balance} ${voucher_sale_disc_per} ${voucher_sale_disc_amt} ${voucher_sale_tds_amt} FROM erp_sale_tax_invoice as tax_par LEFT JOIN erp_party as party ON party.id=tax_par.buyer_id WHERE tax_par.user_id='${user_id}' AND tax_par.company_id<='${company_id}' AND tax_par.year_id<='${year_id}' AND tax_par.branch_id<='${branch_id}' AND tax_par.buyer_id='${party_id}' AND tax_par.sale_tax_invoice_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=tax_par.id AND voucher.voucher_child_invoice_type='sale' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND tax_par.is_delete_status='0' UNION ALL SELECT 'saledebitnote' as invoice_type,return_par.id as sale_return_id,return_par.id as ref_id,return_par.sale_return_note_no as invoice_no,return_par.sale_return_date as invoice_date,return_par.sale_return_total_net_amount as invoice_amount,return_par.sale_return_total_tds as bill_tds,(SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') as paid ${voucher_sale_debit_balance} ${voucher_sale_debit_disc_per} ${voucher_sale_debit_disc_amt} ${voucher_sale_debit_tds_amt} FROM erp_sale_return as return_par LEFT JOIN erp_party as party ON party.id=return_par.buyer_id WHERE return_par.user_id='${user_id}' AND return_par.company_id<='${company_id}' AND return_par.year_id<='${year_id}' AND return_par.branch_id<='${branch_id}' AND return_par.buyer_id='${party_id}' AND return_par.sale_return_type_id='97' AND return_par.sale_return_total_net_amount > (SELECT COALESCE(SUM(voucher.voucher_child_balance),0) FROM erp_voucher_child as voucher WHERE voucher.tax_invoice_id=return_par.id AND voucher.voucher_child_invoice_type='saledebitnote' AND voucher.is_delete_status='0') AND party.account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27' OR account_head_id IN (SELECT id FROM erp_account_head WHERE id='27'))) AND party.is_delete_status='0' AND return_par.is_delete_status='0'`;
 
 
-            const getsalesinvoicedata = `
+            const getsalesinvoicedata = `                
                 WITH Calculations AS (
                     SELECT 
                         tax_par.id AS tax_par_id,
@@ -1034,8 +1034,9 @@ const AllVoucherApis = {
                     calc.total_amount_dollar,
                     calc.total_amount_dirham,
                     "0" AS bill_tds,
-                    child.id AS voucher_child_id,
-                    (
+                    DATE_FORMAT(tax_par.date, '%Y-%m-%d') AS invoice_date,
+
+                      (
                         SELECT COALESCE(SUM(child.voucher_child_balance_dollar), 0) 
                         FROM erp_voucher_child AS child 
                         WHERE child.id IN (${voucher_child_id}) 
@@ -1051,12 +1052,14 @@ const AllVoucherApis = {
                         AND child.voucher_child_invoice_type = 'sale' 
                         AND child.is_delete_status = '0'
                     ) AS voucher_child_balance_dirham,
+                
                     ROUND(
                     (
                         SELECT COALESCE(SUM(voucher.voucher_child_balance_dollar), 0) 
                         FROM erp_voucher_child AS voucher 
                         WHERE voucher.tax_invoice_id = tax_par.id 
                         AND voucher.voucher_child_invoice_type = 'sale' 
+                         AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
                     ), 2
                     ) AS paid_dollar,
@@ -1067,6 +1070,7 @@ const AllVoucherApis = {
                         FROM erp_voucher_child AS voucher 
                         WHERE voucher.tax_invoice_id = tax_par.id 
                         AND voucher.voucher_child_invoice_type = 'sale' 
+                         AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
                     ), 2
                     ) AS paid_dirham,
@@ -1078,16 +1082,18 @@ const AllVoucherApis = {
                                 FROM erp_voucher_child AS child 
                                 WHERE child.tax_invoice_id = tax_par.id 
                                 AND child.voucher_child_invoice_type = 'sale' 
+                                AND child.releted_name = 'webportal'
                                 AND child.is_delete_status = '0'
                             ) > 0 THEN (
                                 SELECT COALESCE(
-                                    voucher.voucher_child_invoice_amount_dollar - SUM(voucher.voucher_child_disc_amt_dollar) - SUM(voucher.voucher_child_balance_dollar), 0
+                                    MAX(voucher.voucher_child_invoice_amount_dollar) - SUM(voucher.voucher_child_disc_amt_dollar) - SUM(voucher.voucher_child_balance_dollar), 0
                                 ) 
                                 FROM erp_voucher_child AS voucher 
-                                JOIN erp_voucher AS main_voucher 
+                                LEFT JOIN erp_voucher AS main_voucher 
                                 ON main_voucher.id = voucher.voucher_id 
                                 WHERE voucher.tax_invoice_id = tax_par.id 
                                 AND voucher.voucher_child_invoice_type = 'sale' 
+                                 AND voucher.releted_name = 'webportal'
                                 AND voucher.is_delete_status = '0'
                             )
                             ELSE calc.total_amount_dollar
@@ -1101,17 +1107,19 @@ const AllVoucherApis = {
                                 SELECT COUNT(*) 
                                 FROM erp_voucher_child AS child 
                                 WHERE child.tax_invoice_id = tax_par.id 
-                                AND child.voucher_child_invoice_type = 'sale' 
+                                AND child.voucher_child_invoice_type = 'sale'
+                                 AND child.releted_name = 'webportal' 
                                 AND child.is_delete_status = '0'
                             ) > 0 THEN (
                                 SELECT COALESCE(
-                                    voucher.voucher_child_invoice_amount_dirham - SUM(voucher.voucher_child_disc_amt_dirham) - SUM(voucher.voucher_child_balance_dirham), 0
+                                    MAX(voucher.voucher_child_invoice_amount_dirham) - SUM(voucher.voucher_child_disc_amt_dirham) - SUM(voucher.voucher_child_balance_dirham), 0
                                 ) 
                                 FROM erp_voucher_child AS voucher 
-                                JOIN erp_voucher AS main_voucher 
+                                LEFT JOIN erp_voucher AS main_voucher 
                                 ON main_voucher.id = voucher.voucher_id 
                                 WHERE voucher.tax_invoice_id = tax_par.id 
                                 AND voucher.voucher_child_invoice_type = 'sale' 
+                                 AND voucher.releted_name = 'webportal'
                                 AND voucher.is_delete_status = '0'
                             )
                             ELSE calc.total_amount_dirham
@@ -1122,8 +1130,8 @@ const AllVoucherApis = {
                         SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dollar), 0)
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
-                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
                     ) AS discount_dollar,
 
@@ -1131,10 +1139,18 @@ const AllVoucherApis = {
                         SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dirham), 0)
                         FROM erp_voucher_child AS voucher
                         WHERE voucher.tax_invoice_id = tax_par.id 
-                        AND voucher.id IN (${voucher_child_id})
                         AND voucher.voucher_child_invoice_type = 'sale'
+                        AND voucher.releted_name = 'webportal'
                         AND voucher.is_delete_status = '0'
-                    ) AS discount_dirham
+                    ) AS discount_dirham,
+
+                        (SELECT child.id 
+                                            FROM erp_voucher_child AS child 
+                                            WHERE child.tax_invoice_id = tax_par.id 
+                                            AND child.voucher_child_invoice_type = 'sale' 
+                                            AND child.releted_name = 'webportal' 
+                                            AND child.is_delete_status = '0' 
+                                            LIMIT 1) AS voucher_child_id
 
 
                 FROM 
@@ -1143,36 +1159,159 @@ const AllVoucherApis = {
                     sales_orders AS tax_par ON blrcl.sales_order_id = tax_par.id
                 LEFT JOIN 
                     partys AS party ON party.id = tax_par.party_name
-                    LEFT JOIN 
-                      erp_voucher_child AS child ON child.tax_invoice_id = tax_par.id 
+         
                 LEFT JOIN 
                     Calculations AS calc ON tax_par.id = calc.tax_par_id
                 WHERE 
                     tax_par.party_name = '${party_id}' 
-                    AND 
-                child.is_delete_status = '0'
+               
                 GROUP BY  
                     blrcl.sales_order_id;
+
+                
+                SELECT 
+                    'sale' AS invoice_type,
+                    'accounting' AS releted_name,
+                    tax_par.id AS sales_tax_id,
+                    tax_par.id AS ref_id,
+                    tax_par.id AS invoice_no,
+                    tax_par.invoice_date ,
+                    party.party_name,
+                    tax_par.total_amount_dollar,
+                    tax_par.total_amount_dirham,
+                    "0" AS bill_tds,
+                    DATE_FORMAT(tax_par.invoice_date, '%Y-%m-%d') AS invoice_date,
+
+                    (SELECT COALESCE(SUM(child.voucher_child_balance_dollar), 0) 
+                    FROM erp_voucher_child AS child 
+                    WHERE child.tax_invoice_id = tax_par.id 
+                    AND child.voucher_child_invoice_type = 'sale' 
+                    AND child.releted_name = 'accounting'
+                    AND child.is_delete_status = '0') AS voucher_child_balance_dollar,
+
+                    (SELECT COALESCE(SUM(child.voucher_child_balance_dirham), 0) 
+                    FROM erp_voucher_child AS child 
+                    WHERE child.tax_invoice_id = tax_par.id 
+                    AND child.voucher_child_invoice_type = 'sale'
+                    AND child.releted_name = 'accounting'
+                    AND child.is_delete_status = '0') AS voucher_child_balance_dirham,
+
+                    (SELECT COALESCE(SUM(voucher.voucher_child_balance_dollar), 0)
+                    FROM erp_voucher_child AS voucher
+                    WHERE voucher.tax_invoice_id = tax_par.id
+                    AND voucher.voucher_child_invoice_type = 'sale'
+                    AND voucher.releted_name = 'accounting'
+                    AND voucher.is_delete_status = '0') AS paid_dollar,
+
+                    (SELECT COALESCE(SUM(voucher.voucher_child_balance_dirham), 0)
+                    FROM erp_voucher_child AS voucher
+                    WHERE voucher.tax_invoice_id = tax_par.id
+                    AND voucher.voucher_child_invoice_type = 'sale'
+                    AND voucher.is_delete_status = '0') AS paid_dirham,
+
+                    (CASE
+                        WHEN (
+                            SELECT COUNT(*)
+                            FROM erp_voucher_child AS child
+                            WHERE child.tax_invoice_id = tax_par.id
+                            AND child.voucher_child_invoice_type = 'sale'
+                            AND child.releted_name = 'accounting'
+                            AND child.is_delete_status = '0'
+                        ) > 0 THEN (
+                            SELECT COALESCE(
+                                MAX(voucher.voucher_child_invoice_amount_dollar) - SUM(voucher.voucher_child_disc_amt_dollar) - SUM(voucher.voucher_child_balance_dollar), 0
+                            )
+                            FROM erp_voucher_child AS voucher
+                            LEFT JOIN erp_voucher AS main_voucher
+                            ON main_voucher.id = voucher.voucher_id
+                            WHERE voucher.tax_invoice_id = tax_par.id
+                            AND voucher.voucher_child_invoice_type = 'sale'
+                            AND voucher.releted_name = 'accounting'
+                            AND voucher.is_delete_status = '0'
+                        )
+                        ELSE tax_par.total_amount_dollar
+                    END) AS pending_amount_dollar,
+
+                    (CASE
+                        WHEN (
+                            SELECT COUNT(*)
+                            FROM erp_voucher_child AS child
+                            WHERE child.tax_invoice_id = tax_par.id
+                            AND child.voucher_child_invoice_type = 'sale'
+                            AND child.releted_name = 'accounting'
+                            AND child.is_delete_status = '0'
+                        ) > 0 THEN (
+                            SELECT COALESCE(
+                                MAX(voucher.voucher_child_invoice_amount_dirham) - SUM(voucher.voucher_child_disc_amt_dirham) - SUM(voucher.voucher_child_balance_dirham), 0
+                            )
+                            FROM erp_voucher_child AS voucher
+                            LEFT JOIN erp_voucher AS main_voucher
+                            ON main_voucher.id = voucher.voucher_id
+                            WHERE voucher.tax_invoice_id = tax_par.id
+                            AND voucher.voucher_child_invoice_type = 'sale'
+                            AND voucher.releted_name = 'accounting'
+                            AND voucher.is_delete_status = '0'
+                        )
+                        ELSE tax_par.total_amount_dirham
+                    END) AS pending_amount_dirham,
+                    
+                                        (
+                                            SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dollar), 0)
+                                            FROM erp_voucher_child AS voucher
+                                            WHERE voucher.tax_invoice_id = tax_par.id 
+                                            AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.releted_name = 'accounting'
+                                            AND voucher.is_delete_status = '0'
+                                        ) AS discount_dollar,
+
+                                        (
+                                            SELECT COALESCE(SUM(voucher.voucher_child_disc_amt_dirham), 0)
+                                            FROM erp_voucher_child AS voucher
+                                            WHERE voucher.tax_invoice_id = tax_par.id 
+                                            AND voucher.voucher_child_invoice_type = 'sale'
+                                            AND voucher.releted_name = 'accounting'
+                                            AND voucher.is_delete_status = '0'
+                                        ) AS discount_dirham,
+
+                                            (SELECT child.id 
+                                            FROM erp_voucher_child AS child 
+                                            WHERE child.tax_invoice_id = tax_par.id 
+                                            AND child.voucher_child_invoice_type = 'sale' 
+                                            AND child.releted_name = 'accounting' 
+                                            AND child.is_delete_status = '0' 
+                                            LIMIT 1) AS voucher_child_id,
+                                         (
+                        SELECT 
+                            CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+                        FROM erp_voucher_child AS child
+                        WHERE 
+                            child.tax_invoice_id = tax_par.id 
+                            AND child.voucher_child_invoice_type = 'sale'
+                            AND child.is_delete_status = '0'
+                    ) AS is_editable
+   
+
+                FROM 
+                    sales_invoice_report AS tax_par
+                LEFT JOIN 
+                    partys AS party ON party.id = tax_par.party_id
+                WHERE 
+                    tax_par.party_id = '${party_id}' 
+                    AND tax_par.user_id = '1'	
+                    AND tax_par.is_delete_status = '0';
                 `;
             console.log("getsalesinvoicedata::", getsalesinvoicedata);
-            
+
             conn.query(getsalesinvoicedata, (error, data) => {
-                
-            // console.log("data getsalesinvoicedata ::", data);
 
-            // if (error || !data[0] || data[0].length === 0) {
-            //     res?.send({ Status: 400, Count: 0, Message: 'Data Not Found!!!!', Data: error });
-            //     next();
-            //     return;
-            // }
+                console.log("data getsalesinvoicedata ::", data);
 
-            // // // Flatten the nested data if necessary
-            // // const flattenedData = data[0];
-            // const flattenedData = [...data[0], ...data[1]]; // The result from the stored procedure is usually in the first index
-            // console.log("data results ::", data[0],data[1]);
-        
-                if (error || data?.length == 0) {
-                    res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
+                const flattenedData = [...data[0], ...data[1]];
+                console.log("data results ::", data[1]);
+
+
+                if (error || !data[0] || data[0].length === 0) {
+                    res?.send({ Status: 400, Count: 0, Message: 'Data Not Found!!!!', Data: error });
                     next();
                     return;
                 }
@@ -1181,10 +1320,27 @@ const AllVoucherApis = {
                         saledata.invoice_date = constant.moment(saledata.invoice_date).format('YYYY-MM-DD');
                     });
 
-                    res?.send({ Status: 200, Count: data[0]?.length, Message: 'Data found', Data: data });
+                    res?.send({ Status: 200, Count: data[0]?.length, Message: 'Data found', Data: flattenedData });
                     next();
                     return;
                 }
+
+
+
+                // if (error || data?.length == 0) {
+                //     res?.send({ Status: 400, Count: 0, Message: ' Sale Data Not Found!!!!', Data: error });
+                //     next();
+                //     return;
+                // }
+                // else {
+                //     data?.forEach(saledata => {
+                //         saledata.invoice_date = constant.moment(saledata.invoice_date).format('YYYY-MM-DD');
+                //     });
+
+                //     res?.send({ Status: 200, Count: data[0]?.length, Message: 'Data found', Data: data });
+                //     next();
+                //     return;
+                // }
             });
         }
         else if (voucher_type == 'payment' || voucher_type == 'journal') {
